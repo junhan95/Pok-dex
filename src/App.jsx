@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { CgPokemon } from 'react-icons/cg';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import Home from './pages/Home';
