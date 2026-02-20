@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://junhan95.github.io/Pok-dex/sitemap.xml
