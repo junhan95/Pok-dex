@@ -22,13 +22,19 @@ export const fetchAllPokemonWithNames = async () => {
 
     const query = `
     query {
-      ko: pokemon_v2_pokemonspeciesname(where: {language_id: { _eq: 3 }}) {
-        id: pokemon_species_id
-        name
-      }
-      en: pokemon_v2_pokemonspeciesname(where: {language_id: { _eq: 9 }}) {
-        id: pokemon_species_id
-        name
+      pokemon: pokemon_v2_pokemonspecies(order_by: {id: asc}) {
+        id
+        names: pokemon_v2_pokemonspeciesnames(where: {language_id: {_in: [3, 9]}}) {
+          name
+          language_id
+        }
+        pokemons: pokemon_v2_pokemons(limit: 1) {
+          types: pokemon_v2_pokemontypes(order_by: {slot: asc}) {
+            type: pokemon_v2_type {
+              name
+            }
+          }
+        }
       }
     }
     `;
@@ -40,17 +46,20 @@ export const fetchAllPokemonWithNames = async () => {
         });
         const json = await response.json();
 
-        const map = {};
-        json.data.en.forEach(item => {
-            map[item.id] = { id: item.id, name: item.name.toLowerCase() };
-        });
-        json.data.ko.forEach(item => {
-            if (map[item.id]) {
-                map[item.id].ko = item.name;
-            }
+        allPokemonCache = json.data.pokemon.map(species => {
+            const enName = species.names.find(n => n.language_id === 9);
+            const koName = species.names.find(n => n.language_id === 3);
+            const pokemon = species.pokemons[0];
+            const types = pokemon ? pokemon.types.map(t => t.type.name) : [];
+
+            return {
+                id: species.id,
+                name: enName ? enName.name.toLowerCase() : `pokemon-${species.id}`,
+                ko: koName ? koName.name : null,
+                types
+            };
         });
 
-        allPokemonCache = Object.values(map).sort((a, b) => a.id - b.id);
         return allPokemonCache;
     } catch (e) {
         console.error('GraphQL fetch failed, falling back to REST list', e);
@@ -58,17 +67,24 @@ export const fetchAllPokemonWithNames = async () => {
         allPokemonCache = fallback.results.map(p => {
             const parts = p.url.split('/');
             const id = parseInt(parts[parts.length - 2]);
-            return { id, name: p.name, ko: p.name };
+            return { id, name: p.name, ko: p.name, types: [] };
         });
         return allPokemonCache;
     }
 };
 
+const detailsCache = new Map();
+
 export const fetchPokemonDetails = async (nameOrId) => {
+    const key = String(nameOrId);
+    if (detailsCache.has(key)) return detailsCache.get(key);
+
     try {
         const response = await fetch(`${BASE_URL}/pokemon/${nameOrId}`);
         if (!response.ok) throw new Error(`Failed to fetch details for ${nameOrId}`);
-        return await response.json();
+        const data = await response.json();
+        detailsCache.set(key, data);
+        return data;
     } catch (error) {
         console.error(`Error fetching details for ${nameOrId}:`, error);
         throw error;

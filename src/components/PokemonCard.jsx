@@ -4,31 +4,29 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
-const PokemonCard = ({ pokemon, index }) => {
+const PokemonCard = React.memo(({ pokemon, index }) => {
     const { language, t } = useLanguage();
-    const [details, setDetails] = useState(null);
-    const [error, setError] = useState(false);
+    const [types, setTypes] = useState(pokemon.types || []);
 
-    // Extract ID from url if available, otherwise use exact ID from new GraphQL payload
     const id = pokemon.id || parseInt(pokemon.url.split('/').filter(Boolean).pop());
-
-    // Determine localized name depending on current context language
     const displayName = language === 'ko' && pokemon.ko ? pokemon.ko : pokemon.name;
 
+    // Only fetch details if types weren't provided by the parent (fallback for legacy data)
     useEffect(() => {
+        if (types.length > 0) return; // Already have types from GraphQL
+
         let isMounted = true;
         const fetchTypes = async () => {
             try {
                 const data = await fetchPokemonDetails(id);
-                if (isMounted) setDetails(data);
+                if (isMounted) setTypes(data.types.map(t => t.type.name));
             } catch (err) {
-                if (isMounted) setError(true);
+                // silently fail, types just won't show
             }
         };
         fetchTypes();
-
         return () => { isMounted = false; };
-    }, [id]);
+    }, [id, types.length]);
 
     const fallbackImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const primaryImage = getPokemonImageUrl(id);
@@ -58,13 +56,13 @@ const PokemonCard = ({ pokemon, index }) => {
                     <h3 className="pokemon-name" title={displayName}>{displayName}</h3>
 
                     <div className="pokemon-types">
-                        {details ? details.types.map(tData => (
+                        {types.length > 0 ? types.map(typeName => (
                             <span
-                                key={tData.type.name}
+                                key={typeName}
                                 className="type-badge"
-                                style={{ backgroundColor: `var(--type-${tData.type.name})` }}
+                                style={{ backgroundColor: `var(--type-${typeName})` }}
                             >
-                                {t(`type_${tData.type.name}`)}
+                                {t(`type_${typeName}`)}
                             </span>
                         )) : <span className="type-badge loading-badge">...</span>}
                     </div>
@@ -72,6 +70,8 @@ const PokemonCard = ({ pokemon, index }) => {
             </Link>
         </motion.div>
     );
-};
+});
+
+PokemonCard.displayName = 'PokemonCard';
 
 export default PokemonCard;

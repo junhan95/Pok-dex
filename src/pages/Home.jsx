@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchAllPokemonWithNames, fetchPokemonType } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
 import Loading from '../components/Loading';
@@ -67,25 +67,33 @@ const Home = () => {
         }
     };
 
-    // Derived State: Filtering
-    let displayList = allPokemonList;
+    // Derived State: Filtering (memoized to avoid recalculating on unrelated re-renders)
+    const displayList = useMemo(() => {
+        let list = allPokemonList;
 
-    if (searchTerm) {
-        const lowerSearch = searchTerm.toLowerCase();
-        displayList = displayList.filter(p =>
-            p.name.includes(lowerSearch) || (p.ko && p.ko.includes(lowerSearch)) || String(p.id) === lowerSearch
-        );
-    }
+        if (searchTerm) {
+            const lowerSearch = searchTerm.toLowerCase();
+            list = list.filter(p =>
+                p.name.includes(lowerSearch) || (p.ko && p.ko.includes(lowerSearch)) || String(p.id) === lowerSearch
+            );
+        }
 
-    if (selectedTypes.length > 0) {
-        displayList = displayList.filter(p => {
-            // Intersection: Pokemon must have ALL selected types
-            return selectedTypes.every(type => {
-                const typeSet = typeDataCache[type];
-                return typeSet ? typeSet.has(p.name) : false;
+        if (selectedTypes.length > 0) {
+            list = list.filter(p => {
+                // Use pre-fetched types from GraphQL data
+                if (p.types && p.types.length > 0) {
+                    return selectedTypes.every(type => p.types.includes(type));
+                }
+                // Fallback to typeDataCache for REST-sourced data
+                return selectedTypes.every(type => {
+                    const typeSet = typeDataCache[type];
+                    return typeSet ? typeSet.has(p.name) : false;
+                });
             });
-        });
-    }
+        }
+
+        return list;
+    }, [allPokemonList, searchTerm, selectedTypes, typeDataCache]);
 
     // Pagination logic
     const totalPages = Math.ceil(displayList.length / itemsPerPage);

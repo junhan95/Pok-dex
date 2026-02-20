@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { CgPokemon } from 'react-icons/cg';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import Home from './pages/Home';
-import PokemonDetail from './pages/PokemonDetail';
+import Loading from './components/Loading';
 import './index.css';
+
+const PokemonDetail = React.lazy(() => import('./pages/PokemonDetail'));
 
 const Navbar = () => {
   const { language, toggleLanguage, t } = useLanguage();
@@ -48,10 +50,12 @@ function App() {
     <LanguageProvider>
       <Router>
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/pokemon/:id" element={<PokemonDetail />} />
-        </Routes>
+        <Suspense fallback={<main className="container" style={{ padding: '4rem 0' }}><Loading /></main>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/pokemon/:id" element={<PokemonDetail />} />
+          </Routes>
+        </Suspense>
       </Router>
     </LanguageProvider>
   );
