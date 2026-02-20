@@ -25,7 +25,7 @@ const GENERATIONS = [
 
 const Home = () => {
     const { t, language } = useLanguage();
-    const { favorites } = useFavorites();
+    const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
     // Search & Filter State
     const [searchTerm, setSearchTerm] = useState('');
@@ -232,7 +232,13 @@ const Home = () => {
                         <>
                             <div className="pokemon-grid">
                                 {paginatedList.map((p, index) => (
-                                    <PokemonCard key={p.id || p.name} pokemon={p} index={index} />
+                                    <PokemonCard
+                                        key={p.id || p.name}
+                                        pokemon={p}
+                                        index={index}
+                                        favorited={isFavorite(p.id || parseInt((p.url || '').split('/').filter(Boolean).pop()))}
+                                        onToggleFavorite={toggleFavorite}
+                                    />
                                 ))}
                             </div>
 

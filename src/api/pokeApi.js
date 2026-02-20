@@ -16,9 +16,27 @@ export const fetchPokemonList = async (limit = 20, offset = 0) => {
 };
 
 let allPokemonCache = null;
+const CACHE_KEY_ALL_POKEMON = 'pokedex_all_pokemon_data';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const fetchAllPokemonWithNames = async () => {
     if (allPokemonCache) return allPokemonCache;
+
+    // Check localStorage cache
+    try {
+        const cached = localStorage.getItem(CACHE_KEY_ALL_POKEMON);
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_TTL_MS) {
+                allPokemonCache = data;
+                return data;
+            } else {
+                localStorage.removeItem(CACHE_KEY_ALL_POKEMON);
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to read from localStorage cache', e);
+    }
 
     const query = `
     query {
@@ -61,6 +79,16 @@ export const fetchAllPokemonWithNames = async () => {
                 gen: species.generation_id
             };
         });
+
+        // Save to cache
+        try {
+            localStorage.setItem(CACHE_KEY_ALL_POKEMON, JSON.stringify({
+                data: allPokemonCache,
+                timestamp: Date.now()
+            }));
+        } catch (e) {
+            console.warn('Failed to save to localStorage cache', e);
+        }
 
         return allPokemonCache;
     } catch (e) {

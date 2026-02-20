@@ -3,16 +3,14 @@ import { fetchPokemonDetails, getPokemonImageUrl } from '../api/pokeApi';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { useFavorites } from '../context/FavoritesContext';
 
-const PokemonCard = React.memo(({ pokemon, index }) => {
+const PokemonCard = React.memo(({ pokemon, index, favorited, onToggleFavorite }) => {
     const { language, t } = useLanguage();
-    const { toggleFavorite, isFavorite } = useFavorites();
     const [types, setTypes] = useState(pokemon.types || []);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const id = pokemon.id || parseInt(pokemon.url.split('/').filter(Boolean).pop());
     const displayName = language === 'ko' && pokemon.ko ? pokemon.ko : pokemon.name;
-    const favorited = isFavorite(id);
 
     // Only fetch details if types weren't provided by the parent (fallback for legacy data)
     useEffect(() => {
@@ -37,7 +35,7 @@ const PokemonCard = React.memo(({ pokemon, index }) => {
     const handleFavorite = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleFavorite(id);
+        if (onToggleFavorite) onToggleFavorite(id);
     };
 
     return (
@@ -58,13 +56,31 @@ const PokemonCard = React.memo(({ pokemon, index }) => {
                 >
                     {favorited ? '❤️' : '🤍'}
                 </button>
-                <div className="pokemon-card-image-container">
+                <div className="pokemon-card-image-container" style={{ position: 'relative' }}>
+                    {/* Low-res sprite shown while loading high-res art */}
+                    <img
+                        src={fallbackImage}
+                        alt=""
+                        className="pokemon-card-image"
+                        style={{
+                            position: 'absolute',
+                            opacity: imageLoaded ? 0 : 0.5,
+                            transition: 'opacity 0.3s',
+                            filter: 'blur(4px)'
+                        }}
+                        aria-hidden="true"
+                    />
                     <img
                         src={primaryImage}
                         alt={displayName}
-                        onError={(e) => { e.target.onerror = null; e.target.src = fallbackImage; }}
+                        onLoad={() => setImageLoaded(true)}
+                        onError={(e) => { e.target.onerror = null; e.target.src = fallbackImage; setImageLoaded(true); }}
                         loading="lazy"
                         className="pokemon-card-image"
+                        style={{
+                            opacity: imageLoaded ? 1 : 0,
+                            transition: 'opacity 0.3s'
+                        }}
                     />
                 </div>
                 <div className="pokemon-card-info">
