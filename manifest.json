@@ -1,0 +1,16 @@
+{
+    "name": "Pokédex - 포켓몬 도감",
+    "short_name": "Pokédex",
+    "description": "모든 세대의 포켓몬을 검색하고 탐험하세요",
+    "start_url": "/Pok-dex/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "icons": [
+        {
+            "src": "vite.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}
