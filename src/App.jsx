@@ -4,9 +4,11 @@ import { CgPokemon } from 'react-icons/cg';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import Home from './pages/Home';
 import Loading from './components/Loading';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 const PokemonDetail = React.lazy(() => import('./pages/PokemonDetail'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const Navbar = () => {
   const { language, toggleLanguage, t } = useLanguage();
@@ -48,15 +50,18 @@ const Navbar = () => {
 function App() {
   return (
     <LanguageProvider>
-      <Router>
-        <Navbar />
-        <Suspense fallback={<main className="container" style={{ padding: '4rem 0' }}><Loading /></main>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/pokemon/:id" element={<PokemonDetail />} />
-          </Routes>
-        </Suspense>
-      </Router>
+      <ErrorBoundary>
+        <Router>
+          <Navbar />
+          <Suspense fallback={<main className="container" style={{ padding: '4rem 0' }}><Loading /></main>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/pokemon/:id" element={<PokemonDetail />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </ErrorBoundary>
     </LanguageProvider>
   );
 }

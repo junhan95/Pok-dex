@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { fetchAllPokemonWithNames, fetchPokemonType } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
-import Loading from '../components/Loading';
+import SkeletonGrid from '../components/SkeletonGrid';
 import { useLanguage } from '../context/LanguageContext';
+import useDebounce from '../hooks/useDebounce';
 
 const POKEMON_TYPES = [
     'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison',
@@ -14,6 +15,7 @@ const Home = () => {
 
     // Search & Filter State
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearch = useDebounce(searchTerm, 300);
     const [selectedTypes, setSelectedTypes] = useState([]);
 
     // Data State
@@ -71,8 +73,8 @@ const Home = () => {
     const displayList = useMemo(() => {
         let list = allPokemonList;
 
-        if (searchTerm) {
-            const lowerSearch = searchTerm.toLowerCase();
+        if (debouncedSearch) {
+            const lowerSearch = debouncedSearch.toLowerCase();
             list = list.filter(p =>
                 p.name.includes(lowerSearch) || (p.ko && p.ko.includes(lowerSearch)) || String(p.id) === lowerSearch
             );
@@ -93,16 +95,16 @@ const Home = () => {
         }
 
         return list;
-    }, [allPokemonList, searchTerm, selectedTypes, typeDataCache]);
+    }, [allPokemonList, debouncedSearch, selectedTypes, typeDataCache]);
 
     // Pagination logic
     const totalPages = Math.ceil(displayList.length / itemsPerPage);
     const paginatedList = displayList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    // Reset pagination on search
+    // Reset pagination on debounced search
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm]);
+    }, [debouncedSearch]);
 
     // Generate Pagination Array
     const getPageNumbers = () => {
@@ -179,8 +181,8 @@ const Home = () => {
                         </div>
                     )}
 
-                    {/* Loading State Overlay */}
-                    {searchLoading && <Loading />}
+                    {/* Loading State - Skeleton Grid */}
+                    {searchLoading && <SkeletonGrid count={24} />}
 
                     {/* Grid */}
                     {displayList.length > 0 && (
