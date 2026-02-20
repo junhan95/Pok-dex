@@ -3,17 +3,20 @@ import { fetchPokemonDetails, getPokemonImageUrl } from '../api/pokeApi';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useFavorites } from '../context/FavoritesContext';
 
 const PokemonCard = React.memo(({ pokemon, index }) => {
     const { language, t } = useLanguage();
+    const { toggleFavorite, isFavorite } = useFavorites();
     const [types, setTypes] = useState(pokemon.types || []);
 
     const id = pokemon.id || parseInt(pokemon.url.split('/').filter(Boolean).pop());
     const displayName = language === 'ko' && pokemon.ko ? pokemon.ko : pokemon.name;
+    const favorited = isFavorite(id);
 
     // Only fetch details if types weren't provided by the parent (fallback for legacy data)
     useEffect(() => {
-        if (types.length > 0) return; // Already have types from GraphQL
+        if (types.length > 0) return;
 
         let isMounted = true;
         const fetchTypes = async () => {
@@ -21,7 +24,7 @@ const PokemonCard = React.memo(({ pokemon, index }) => {
                 const data = await fetchPokemonDetails(id);
                 if (isMounted) setTypes(data.types.map(t => t.type.name));
             } catch (err) {
-                // silently fail, types just won't show
+                // silently fail
             }
         };
         fetchTypes();
@@ -30,6 +33,12 @@ const PokemonCard = React.memo(({ pokemon, index }) => {
 
     const fallbackImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
     const primaryImage = getPokemonImageUrl(id);
+
+    const handleFavorite = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFavorite(id);
+    };
 
     return (
         <motion.div
@@ -42,6 +51,13 @@ const PokemonCard = React.memo(({ pokemon, index }) => {
                 className="pokemon-card glass"
                 aria-label={`View details for ${displayName}`}
             >
+                <button
+                    className={`favorite-btn ${favorited ? 'active' : ''}`}
+                    onClick={handleFavorite}
+                    aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    {favorited ? '❤️' : '🤍'}
+                </button>
                 <div className="pokemon-card-image-container">
                     <img
                         src={primaryImage}

@@ -24,6 +24,7 @@ export const fetchAllPokemonWithNames = async () => {
     query {
       pokemon: pokemon_v2_pokemonspecies(order_by: {id: asc}) {
         id
+        generation_id
         names: pokemon_v2_pokemonspeciesnames(where: {language_id: {_in: [3, 9]}}) {
           name
           language_id
@@ -56,7 +57,8 @@ export const fetchAllPokemonWithNames = async () => {
                 id: species.id,
                 name: enName ? enName.name.toLowerCase() : `pokemon-${species.id}`,
                 ko: koName ? koName.name : null,
-                types
+                types,
+                gen: species.generation_id
             };
         });
 

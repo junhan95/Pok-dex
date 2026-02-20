@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { CgPokemon } from 'react-icons/cg';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { FavoritesProvider } from './context/FavoritesContext';
 import Home from './pages/Home';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -12,6 +13,14 @@ const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const Navbar = () => {
   const { language, toggleLanguage, t } = useLanguage();
+  const [theme, setTheme] = React.useState(() => localStorage.getItem('pokedex_theme') || 'dark');
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('pokedex_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   return (
     <header className="glass" style={{
@@ -28,7 +37,19 @@ const Navbar = () => {
           Pokédex
         </Link>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            onClick={toggleTheme}
+            className="lang-toggle-btn"
+            style={{
+              background: 'transparent', border: '1px solid var(--accent-primary)', color: 'var(--text-main)',
+              padding: '0.3rem 0.6rem', borderRadius: '20px', cursor: 'pointer', fontWeight: 600,
+              transition: 'all 0.2s ease', fontSize: '1rem'
+            }}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           <button
             onClick={toggleLanguage}
             className="lang-toggle-btn"
@@ -50,18 +71,20 @@ const Navbar = () => {
 function App() {
   return (
     <LanguageProvider>
-      <ErrorBoundary>
-        <Router>
-          <Navbar />
-          <Suspense fallback={<main className="container" style={{ padding: '4rem 0' }}><Loading /></main>}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/pokemon/:id" element={<PokemonDetail />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </Router>
-      </ErrorBoundary>
+      <FavoritesProvider>
+        <ErrorBoundary>
+          <Router>
+            <Navbar />
+            <Suspense fallback={<main className="container" style={{ padding: '4rem 0' }}><Loading /></main>}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/pokemon/:id" element={<PokemonDetail />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </Router>
+        </ErrorBoundary>
+      </FavoritesProvider>
     </LanguageProvider>
   );
 }
