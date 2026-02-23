@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { CgPokemon } from 'react-icons/cg';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { FavoritesProvider } from './context/FavoritesContext';

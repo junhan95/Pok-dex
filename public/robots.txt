@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://junhan95.github.io/Pok-dex/sitemap.xml
+Sitemap: https://pokemon-drawing-book.com/sitemap.xml
