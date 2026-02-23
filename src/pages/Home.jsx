@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { fetchAllPokemonWithNames, fetchPokemonType } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
 import SkeletonGrid from '../components/SkeletonGrid';
+
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import useDebounce from '../hooks/useDebounce';
@@ -145,142 +146,151 @@ const Home = () => {
     };
 
     return (
-        <main className="container">
-            <div style={{ textAlign: 'center', margin: '3rem 0 1.5rem' }}>
-                <h1 style={{ fontSize: '3rem', marginBottom: '1rem', background: 'linear-gradient(to right, var(--accent-primary), var(--accent-secondary))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    {t('welcome_title')}
-                </h1>
-                <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-                    {t('welcome_desc')}
-                </p>
+        <>
+            {/* Hero Banner */}
+            <div className="hero-banner">
+                <img src="/hero-banner.png" alt="Pokédex - 포켓몬 도감" className="hero-banner-img" />
             </div>
 
-            {/* Search Input */}
-            <div className="search-controls" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <label htmlFor="search-input" className="sr-only">{t('search')}</label>
-                <input
-                    id="search-input"
-                    type="text"
-                    placeholder={t('search_placeholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
-                    style={{
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                        border: '1px solid rgba(236, 72, 153, 0.3)',
-                        padding: '1.2rem 2rem',
-                        fontSize: '1.1rem'
-                    }}
-                />
-            </div>
+            <div className="main-layout">
+                <main className="main-content">
+                    <div style={{ textAlign: 'center', margin: '2rem 0 1.5rem' }}>
+                        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', background: 'linear-gradient(to right, var(--accent-primary), var(--accent-secondary))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                            {t('welcome_title')}
+                        </h1>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
+                            {t('welcome_desc')}
+                        </p>
+                    </div>
 
-            {/* Filter Controls Row */}
-            <div className="filter-controls-row">
-                {/* Favorites Toggle */}
-                <button
-                    className={`filter-chip ${showFavoritesOnly ? 'active' : ''}`}
-                    onClick={() => { setShowFavoritesOnly(prev => !prev); setCurrentPage(1); }}
-                >
-                    ❤️ {language === 'ko' ? `즐겨찾기 (${favorites.length})` : `Favorites (${favorites.length})`}
-                </button>
+                    {/* Search Input */}
+                    <div className="search-controls" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                        <label htmlFor="search-input" className="sr-only">{t('search')}</label>
+                        <input
+                            id="search-input"
+                            type="text"
+                            placeholder={t('search_placeholder')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                            style={{
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                                border: '1px solid rgba(236, 72, 153, 0.3)',
+                                padding: '1.2rem 2rem',
+                                fontSize: '1.1rem'
+                            }}
+                        />
+                    </div>
 
-                {/* Generation Filter */}
-                {GENERATIONS.map(gen => (
-                    <button
-                        key={gen.id}
-                        className={`filter-chip gen-chip ${selectedGen === gen.id ? 'active' : ''}`}
-                        onClick={() => { setSelectedGen(prev => prev === gen.id ? null : gen.id); setCurrentPage(1); }}
-                    >
-                        {gen.label}
-                    </button>
-                ))}
-            </div>
+                    {/* Filter Controls Row */}
+                    <div className="filter-controls-row">
+                        {/* Favorites Toggle */}
+                        <button
+                            className={`filter-chip ${showFavoritesOnly ? 'active' : ''}`}
+                            onClick={() => { setShowFavoritesOnly(prev => !prev); setCurrentPage(1); }}
+                        >
+                            ❤️ {language === 'ko' ? `즐겨찾기 (${favorites.length})` : `Favorites (${favorites.length})`}
+                        </button>
 
-            {/* Type Filters */}
-            <div className="type-filter-container container" style={{ maxWidth: '1000px' }}>
-                {POKEMON_TYPES.map(type => (
-                    <button
-                        key={type}
-                        onClick={() => toggleType(type)}
-                        className={`type-filter-btn ${selectedTypes.includes(type) ? 'active' : ''}`}
-                        style={{ backgroundColor: `var(--type-${type})` }}
-                        aria-pressed={selectedTypes.includes(type)}
-                    >
-                        {t(`type_${type}`)} / {type.toUpperCase()}
-                    </button>
-                ))}
-            </div>
+                        {/* Generation Filter */}
+                        {GENERATIONS.map(gen => (
+                            <button
+                                key={gen.id}
+                                className={`filter-chip gen-chip ${selectedGen === gen.id ? 'active' : ''}`}
+                                onClick={() => { setSelectedGen(prev => prev === gen.id ? null : gen.id); setCurrentPage(1); }}
+                            >
+                                {gen.label}
+                            </button>
+                        ))}
+                    </div>
 
-            {/* Content Area */}
-            {error && paginatedList.length === 0 ? (
-                <div className="error-message" role="alert">{error}</div>
-            ) : (
-                <div className="pokemon-grid-container" style={{ paddingTop: '0' }}>
+                    {/* Type Filters */}
+                    <div className="type-filter-container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                        {POKEMON_TYPES.map(type => (
+                            <button
+                                key={type}
+                                onClick={() => toggleType(type)}
+                                className={`type-filter-btn ${selectedTypes.includes(type) ? 'active' : ''}`}
+                                style={{ backgroundColor: `var(--type-${type})` }}
+                                aria-pressed={selectedTypes.includes(type)}
+                            >
+                                {t(`type_${type}`)} / {type.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
 
-                    {/* Empty Results */}
-                    {displayList.length === 0 && !searchLoading && (
-                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                            <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>😢</p>
-                            <p>{showFavoritesOnly
-                                ? (language === 'ko' ? '즐겨찾기가 비어 있습니다. 하트를 눌러 추가해보세요!' : 'No favorites yet. Tap hearts to add!')
-                                : `${t('no_results')} "${searchTerm}"`
-                            }</p>
-                        </div>
-                    )}
+                    {/* Content Area */}
+                    {error && paginatedList.length === 0 ? (
+                        <div className="error-message" role="alert">{error}</div>
+                    ) : (
+                        <div className="pokemon-grid-container" style={{ paddingTop: '0' }}>
 
-                    {/* Skeleton Loading */}
-                    {searchLoading && <SkeletonGrid count={24} />}
-
-                    {/* Grid */}
-                    {displayList.length > 0 && (
-                        <>
-                            <div className="pokemon-grid">
-                                {paginatedList.map((p, index) => (
-                                    <PokemonCard
-                                        key={p.id || p.name}
-                                        pokemon={p}
-                                        index={index}
-                                        favorited={isFavorite(p.id || parseInt((p.url || '').split('/').filter(Boolean).pop()))}
-                                        onToggleFavorite={toggleFavorite}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="pagination-container">
-                                    <button
-                                        className="page-btn"
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                    >
-                                        &laquo;
-                                    </button>
-
-                                    {getPageNumbers().map(num => (
-                                        <button
-                                            key={num}
-                                            className={`page-btn ${currentPage === num ? 'active' : ''}`}
-                                            onClick={() => setCurrentPage(num)}
-                                        >
-                                            {num}
-                                        </button>
-                                    ))}
-
-                                    <button
-                                        className="page-btn"
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                    >
-                                        &raquo;
-                                    </button>
+                            {/* Empty Results */}
+                            {displayList.length === 0 && !searchLoading && (
+                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                                    <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>😢</p>
+                                    <p>{showFavoritesOnly
+                                        ? (language === 'ko' ? '즐겨찾기가 비어 있습니다. 하트를 눌러 추가해보세요!' : 'No favorites yet. Tap hearts to add!')
+                                        : `${t('no_results')} "${searchTerm}"`
+                                    }</p>
                                 </div>
                             )}
-                        </>
+
+                            {/* Skeleton Loading */}
+                            {searchLoading && <SkeletonGrid count={24} />}
+
+                            {/* Grid */}
+                            {displayList.length > 0 && (
+                                <>
+                                    <div className="pokemon-grid">
+                                        {paginatedList.map((p, index) => (
+                                            <PokemonCard
+                                                key={p.id || p.name}
+                                                pokemon={p}
+                                                index={index}
+                                                favorited={isFavorite(p.id || parseInt((p.url || '').split('/').filter(Boolean).pop()))}
+                                                onToggleFavorite={toggleFavorite}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Pagination */}
+                                    {totalPages > 1 && (
+                                        <div className="pagination-container">
+                                            <button
+                                                className="page-btn"
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentPage === 1}
+                                            >
+                                                &laquo;
+                                            </button>
+
+                                            {getPageNumbers().map(num => (
+                                                <button
+                                                    key={num}
+                                                    className={`page-btn ${currentPage === num ? 'active' : ''}`}
+                                                    onClick={() => setCurrentPage(num)}
+                                                >
+                                                    {num}
+                                                </button>
+                                            ))}
+
+                                            <button
+                                                className="page-btn"
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                disabled={currentPage === totalPages}
+                                            >
+                                                &raquo;
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     )}
-                </div>
-            )}
-        </main>
+                </main>
+            </div>
+        </>
     );
 };
 

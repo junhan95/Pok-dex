@@ -6,6 +6,7 @@ import { FavoritesProvider } from './context/FavoritesContext';
 import Home from './pages/Home';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
+import BuyMeACoffee from './components/BuyMeACoffee';
 import './index.css';
 
 const PokemonDetail = React.lazy(() => import('./pages/PokemonDetail'));
@@ -68,6 +69,24 @@ const Navbar = () => {
   );
 };
 
+const Footer = () => (
+  <footer className="site-footer">
+    <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+      <a
+        href="https://ctee.kr/place/pokemon"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="footer-bmc-link"
+      >
+        ☕ Buy me a coffee
+      </a>
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>
+        © {new Date().getFullYear()} Pokédex — Data from <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none' }}>PokéAPI</a>
+      </p>
+    </div>
+  </footer>
+);
+
 function App() {
   return (
     <LanguageProvider>
@@ -82,6 +101,8 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <Footer />
+            <BuyMeACoffee />
           </Router>
         </ErrorBoundary>
       </FavoritesProvider>

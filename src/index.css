@@ -677,3 +677,228 @@ h6 {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: #fff;
 }
+
+/* ===== Ad Container ===== */
+.ad-container {
+  margin: 1.5rem auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.ad-horizontal {
+  width: 100%;
+  min-height: 90px;
+}
+
+.ad-rectangle {
+  width: 100%;
+  min-height: 250px;
+}
+
+.ad-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(51, 65, 85, 0.4));
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  min-height: inherit;
+}
+
+.ad-placeholder-icon {
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
+
+.ad-placeholder-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ad-placeholder-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* ===== Hero Banner ===== */
+.hero-banner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 0;
+  overflow: hidden;
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Main Layout with Right Sidebar ===== */
+.main-layout {
+  display: flex;
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  padding-top: 2rem;
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: fit-content;
+}
+
+@media (max-width: 1024px) {
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .ad-sidebar {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    justify-content: center;
+    padding-top: 0;
+    margin-bottom: 2rem;
+  }
+
+  .ad-sidebar .ad-container {
+    flex: 1;
+    max-width: 336px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ad-sidebar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-banner {
+    padding: 0.5rem 1rem 0;
+  }
+}
+
+/* ===== Buy Me a Coffee Float Button ===== */
+.bmc-float {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ff813f, #ff5f5f);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-family: inherit;
+  box-shadow: 0 4px 20px rgba(255, 95, 95, 0.4);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bmc-float-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.bmc-float-text {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease;
+  margin-left: 0;
+}
+
+.bmc-float:hover {
+  padding: 0 20px;
+  box-shadow: 0 6px 28px rgba(255, 95, 95, 0.5);
+  transform: translateY(-2px);
+}
+
+.bmc-float:hover .bmc-float-icon {
+  transform: rotate(-12deg) scale(1.1);
+}
+
+.bmc-float:hover .bmc-float-text {
+  max-width: 160px;
+  opacity: 1;
+  margin-left: 8px;
+}
+
+.bmc-float:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ===== Footer ===== */
+.site-footer {
+  margin-top: auto;
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.footer-bmc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ff813f, #ff5f5f);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 12px rgba(255, 95, 95, 0.25);
+}
+
+.footer-bmc-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 18px rgba(255, 95, 95, 0.4);
+}
+
+/* ===== Light Mode Additions ===== */
+[data-theme="light"] .ad-placeholder {
+  background: linear-gradient(135deg, rgba(241, 245, 249, 0.9), rgba(226, 232, 240, 0.6));
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .site-footer {
+  background: rgba(241, 245, 249, 0.8);
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
