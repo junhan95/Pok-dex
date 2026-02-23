@@ -4,6 +4,7 @@ import { fetchPokemonDetails, fetchPokemonSpecies, getPokemonImageUrl, fetchEvol
 import Loading from '../components/Loading';
 import { useLanguage } from '../context/LanguageContext';
 import PokemonCard from '../components/PokemonCard';
+import useSEO from '../hooks/useSEO';
 
 const extractEvolutions = (node, acc = []) => {
     if (node && node.species) {
@@ -61,6 +62,19 @@ const PokemonDetail = () => {
         };
         fetchData();
     }, [id]);
+    // Compute SEO values (safe for null pokemon/species)
+    const langKey = language === 'ko' ? 'ko' : 'en';
+    const flavorTextEntry = species?.flavor_text_entries?.find(entry => entry.language.name === langKey) || species?.flavor_text_entries?.find(entry => entry.language.name === 'en');
+    const description = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/\f|\n/g, ' ') : '';
+    const localName = species?.names?.find(n => n.language.name === langKey)?.name || pokemon?.name || '';
+
+    // Dynamic SEO meta tags per Pokemon (must be called before any returns - React hooks rule)
+    useSEO(pokemon ? {
+        title: `${localName} #${String(pokemon.id).padStart(4, '0')} | Pokédex - 포켓몬 도감`,
+        description: `${localName} - ${description}`,
+        image: getPokemonImageUrl(pokemon.id),
+        url: `https://pokemon-drawing-book.com/pokemon/${pokemon.id}`,
+    } : undefined);
 
     if (loading) return <main className="container" style={{ padding: '4rem 0' }}><Loading /></main>;
     if (error) return <main className="container"><div className="error-message">{error}</div></main>;
@@ -68,22 +82,6 @@ const PokemonDetail = () => {
 
     const primaryImage = getPokemonImageUrl(pokemon.id);
     const fallbackImage = pokemon.sprites?.other?.['official-artwork']?.front_default || pokemon.sprites?.front_default;
-
-    // Get flavor text and name dynamically based on selected language
-    const langKey = language === 'ko' ? 'ko' : 'en';
-    const flavorTextEntry = species?.flavor_text_entries.find(entry => entry.language.name === langKey) || species?.flavor_text_entries.find(entry => entry.language.name === 'en');
-    const description = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/\f|\n/g, ' ') : 'No description available.';
-    const localName = species?.names?.find(n => n.language.name === langKey)?.name || pokemon.name;
-
-    // Dynamic page title for SEO
-    useEffect(() => {
-        if (localName && pokemon?.id) {
-            document.title = `${localName} #${String(pokemon.id).padStart(4, '0')} | Pokédex - 포켓몬 도감`;
-        }
-        return () => {
-            document.title = 'Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색';
-        };
-    }, [localName, pokemon?.id]);
 
     return (
         <main className="container pokemon-detail-page">

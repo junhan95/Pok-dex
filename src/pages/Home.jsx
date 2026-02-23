@@ -5,6 +5,7 @@ import SkeletonGrid from '../components/SkeletonGrid';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import useDebounce from '../hooks/useDebounce';
+import useSEO from '../hooks/useSEO';
 
 const POKEMON_TYPES = [
     'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison',
@@ -27,10 +28,8 @@ const Home = () => {
     const { t, language } = useLanguage();
     const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
-    // Set default page title
-    useEffect(() => {
-        document.title = 'Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색';
-    }, []);
+    // SEO meta tags for home page
+    useSEO();
 
     // Search & Filter State
     const [searchTerm, setSearchTerm] = useState('');
