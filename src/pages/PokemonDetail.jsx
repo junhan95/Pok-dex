@@ -68,10 +68,32 @@ const PokemonDetail = () => {
     const description = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/\f|\n/g, ' ') : '';
     const localName = species?.names?.find(n => n.language.name === langKey)?.name || pokemon?.name || '';
 
+    // Build rich SEO description with types, stats, evolution info
+    const seoDescription = (() => {
+        if (!pokemon) return '';
+        const types = pokemon.types?.map(t => t.type.name).join('/') || '';
+        const stats = pokemon.stats?.map(s => {
+            const names = { hp: 'HP', attack: '공격', defense: '방어', 'special-attack': '특공', 'special-defense': '특방', speed: '스피드' };
+            return `${names[s.stat.name] || s.stat.name} ${s.base_stat}`;
+        }).join(' / ') || '';
+        const size = `${pokemon.height / 10}m, ${pokemon.weight / 10}kg`;
+        const evoNames = evolutions.length > 1
+            ? evolutions.map(e => e.ko || e.name).join(' → ')
+            : '';
+        const parts = [
+            `${localName} #${String(pokemon.id).padStart(4, '0')}`,
+            types ? `타입: ${types}` : '',
+            stats ? `능력치: ${stats}` : '',
+            size,
+            evoNames ? `진화: ${evoNames}` : '',
+        ].filter(Boolean);
+        return parts.join(' | ');
+    })();
+
     // Dynamic SEO meta tags per Pokemon (must be called before any returns - React hooks rule)
     useSEO(pokemon ? {
         title: `${localName} #${String(pokemon.id).padStart(4, '0')} | Pokédex - 포켓몬 도감`,
-        description: `${localName} - ${description}`,
+        description: seoDescription,
         image: getPokemonImageUrl(pokemon.id),
         url: `https://pokemon-drawing-book.com/pokemon/${pokemon.id}`,
     } : undefined);
