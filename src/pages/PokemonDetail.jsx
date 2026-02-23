@@ -75,6 +75,16 @@ const PokemonDetail = () => {
     const description = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/\f|\n/g, ' ') : 'No description available.';
     const localName = species?.names?.find(n => n.language.name === langKey)?.name || pokemon.name;
 
+    // Dynamic page title for SEO
+    useEffect(() => {
+        if (localName && pokemon?.id) {
+            document.title = `${localName} #${String(pokemon.id).padStart(4, '0')} | Pokédex - 포켓몬 도감`;
+        }
+        return () => {
+            document.title = 'Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색';
+        };
+    }, [localName, pokemon?.id]);
+
     return (
         <main className="container pokemon-detail-page">
             <Link to="/" className="btn-back">{t('back')}</Link>

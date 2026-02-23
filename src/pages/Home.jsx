@@ -27,6 +27,11 @@ const Home = () => {
     const { t, language } = useLanguage();
     const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
+    // Set default page title
+    useEffect(() => {
+        document.title = 'Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색';
+    }, []);
+
     // Search & Filter State
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 300);

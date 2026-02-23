@@ -4,23 +4,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="포켓몬 도감 - 모든 세대의 포켓몬을 검색하고 탐험하세요. 한국어/영어 지원, 세대별 필터, 진화 체인, 즐겨찾기 기능을 제공합니다." />
-  <meta name="keywords" content="포켓몬, Pokédex, 포켓몬 도감, Pokemon, 피카츄, 이상해씨" />
+  <meta name="description"
+    content="포켓몬 도감 - 1세대부터 9세대까지 모든 포켓몬을 검색하고 탐험하세요. 세대별 필터, 타입별 검색, 능력치, 진화 체인, 즐겨찾기 기능 제공. Pokédex with Korean/English support." />
+  <meta name="keywords"
+    content="포켓몬, 포켓몬 도감, Pokédex, Pokemon, Pokedex, 피카츄, 이상해씨, 리자몽, 포켓몬 검색, 포켓몬 능력치, Pokemon database, 포켓몬 타입, 진화" />
   <meta name="author" content="junhan95" />
   <meta name="theme-color" content="#0f172a" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://pokemon-drawing-book.com/" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Pokédex - 포켓몬 도감" />
-  <meta property="og:description" content="모든 세대의 포켓몬을 검색하고 탐험하세요. 한국어/영어 지원." />
+  <meta property="og:title" content="Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색" />
+  <meta property="og:description" content="1세대부터 9세대까지 모든 포켓몬을 검색하고 탐험하세요. 타입별 필터, 능력치, 진화 체인 제공." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://pokemon-drawing-book.com/" />
   <meta property="og:image"
     content="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" />
+  <meta property="og:site_name" content="Pokédex - 포켓몬 도감" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:locale:alternate" content="en_US" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Pokédex - 포켓몬 도감" />
-  <meta name="twitter:description" content="모든 세대의 포켓몬을 검색하고 탐험하세요." />
+  <meta name="twitter:title" content="Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색" />
+  <meta name="twitter:description" content="1세대부터 9세대까지 모든 포켓몬을 검색하고 탐험하세요." />
   <meta name="twitter:image"
     content="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" />
 
@@ -28,7 +35,25 @@
   <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon" href="/vite.svg" />
 
-  <title>Pokédex - 포켓몬 도감</title>
+  <title>Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색</title>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Pokédex - 포켓몬 도감",
+    "alternateName": ["Pokemon Drawing Book", "포켓몬 도감"],
+    "url": "https://pokemon-drawing-book.com/",
+    "description": "1세대부터 9세대까지 모든 포켓몬을 검색하고 탐험하세요. 한국어/영어 지원.",
+    "inLanguage": ["ko", "en"],
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://pokemon-drawing-book.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 
 <body>
