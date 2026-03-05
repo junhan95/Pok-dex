@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 
+const toCDN = (url) =>
+    `https://res.cloudinary.com/dfwddomdw/image/fetch/${encodeURIComponent(url)}`;
+
 const DEFAULT_SEO = {
     title: 'Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색',
     description: '1세대부터 9세대까지 모든 포켓몬을 검색하고 탐험하세요. 세대별 필터, 타입별 검색, 능력치, 진화 체인, 즐겨찾기 기능 제공.',
-    image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+    image: toCDN('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'),
     url: 'https://pokemon-drawing-book.com/',
 };
 
@@ -21,7 +24,7 @@ const useSEO = ({ title, description, image, url } = {}) => {
     useEffect(() => {
         const t = title || DEFAULT_SEO.title;
         const d = description || DEFAULT_SEO.description;
-        const img = image || DEFAULT_SEO.image;
+        const img = image ? toCDN(image) : DEFAULT_SEO.image;
         const u = url || DEFAULT_SEO.url;
 
         // Title
