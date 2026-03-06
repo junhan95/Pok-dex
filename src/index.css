@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
 :root {
-  /* Color Palette - Premium Dark Mode */
+  /* Color Palette - Dark Mode (from palette) */
   --bg-main: #000000;
   --bg-card: #333333;
   --bg-card-hover: #444444;
@@ -17,6 +17,18 @@
   --color-input: #ffffff;
   --color-ring: #ff6666;
   --color-sidebar: #000000;
+  --color-sidebar-fg: #ffffff;
+  --color-sidebar-primary: #ff6666;
+  --color-sidebar-primary-fg: #000000;
+  --color-sidebar-accent: #3399ff;
+  --color-sidebar-accent-fg: #000000;
+  --color-popover: #333333;
+  --color-muted: #333333;
+  --chart-1: #ff6666;
+  --chart-2: #ffff33;
+  --chart-3: #3399ff;
+  --chart-4: #33cc33;
+  --chart-5: #cc33cc;
 
   /* Type Colors */
   --type-normal: #A8A77A;
@@ -652,6 +664,18 @@ h6 {
   --color-input: #000000;
   --color-ring: #ff3333;
   --color-sidebar: #f0f0f0;
+  --color-sidebar-fg: #000000;
+  --color-sidebar-primary: #ff3333;
+  --color-sidebar-primary-fg: #ffffff;
+  --color-sidebar-accent: #0066ff;
+  --color-sidebar-accent-fg: #ffffff;
+  --color-popover: #ffffff;
+  --color-muted: #f0f0f0;
+  --chart-1: #ff3333;
+  --chart-2: #ffff00;
+  --chart-3: #0066ff;
+  --chart-4: #00cc00;
+  --chart-5: #cc00cc;
 }
 
 [data-theme="light"] .glass {
@@ -914,4 +938,124 @@ h6 {
 [data-theme="light"] .site-footer {
   background: rgba(241, 245, 249, 0.8);
   border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ===== Pokemon Section (진화/모습) ===== */
+.pokemon-section {
+  margin-top: 2.5rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+}
+
+.section-title-icon {
+  font-size: 1.2rem;
+}
+
+/* Evolution chain */
+.evo-chain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.evo-arrow {
+  font-size: 2rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Evolution / Form card */
+.evo-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(128, 128, 128, 0.15);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  max-width: 200px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+a.evo-card:hover {
+  transform: translateY(-4px);
+  background-color: var(--bg-card-hover);
+}
+
+.evo-img-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 110px;
+}
+
+.evo-card-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+.evo-card-no {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.evo-card-name {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.evo-card-types {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Forms grid */
+.forms-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.forms-grid .evo-card {
+  max-width: 200px;
+  min-width: 160px;
+  flex: 0 1 200px;
+  width: auto;
+}
+
+/* Light mode overrides */
+[data-theme="light"] .evo-card {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
