@@ -3,16 +3,20 @@
 
 :root {
   /* Color Palette - Premium Dark Mode */
-  --bg-main: #0f172a;
-  /* Deep slate */
-  --bg-card: #1e293b;
-  --bg-card-hover: #334155;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent-primary: #ec4899;
-  /* Pink/Red accent */
-  --accent-secondary: #8b5cf6;
-  /* Purple accent */
+  --bg-main: #000000;
+  --bg-card: #333333;
+  --bg-card-hover: #444444;
+  --text-main: #ffffff;
+  --text-muted: #cccccc;
+  --accent-primary: #ff6666;
+  --accent-secondary: #3399ff;
+
+  --color-secondary: #ffff33;
+  --color-destructive: #ffffff;
+  --color-border: #ffffff;
+  --color-input: #ffffff;
+  --color-ring: #ff6666;
+  --color-sidebar: #000000;
 
   /* Type Colors */
   --type-normal: #A8A77A;
@@ -634,11 +638,20 @@ h6 {
 
 /* ===== Light Mode ===== */
 [data-theme="light"] {
-  --bg-main: #f1f5f9;
+  --bg-main: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --bg-card-hover: #f0f0f0;
+  --text-main: #000000;
+  --text-muted: #333333;
+  --accent-primary: #ff3333;
+  --accent-secondary: #0066ff;
+
+  --color-secondary: #ffff00;
+  --color-destructive: #000000;
+  --color-border: #000000;
+  --color-input: #000000;
+  --color-ring: #ff3333;
+  --color-sidebar: #f0f0f0;
 }
 
 [data-theme="light"] .glass {
