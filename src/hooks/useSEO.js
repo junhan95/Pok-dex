@@ -4,8 +4,8 @@ const toCDN = (url) =>
     `https://res.cloudinary.com/dfwddomdw/image/fetch/${encodeURIComponent(url)}`;
 
 const DEFAULT_SEO = {
-    title: 'Pokédex - 포켓몬 도감 | 모든 세대 포켓몬 검색',
-    description: '1세대부터 9세대까지 모든 포켓몬을 검색하고 탐험하세요. 세대별 필터, 타입별 검색, 능력치, 진화 체인, 즐겨찾기 기능 제공.',
+    title: '포켓몬 도감 | 이름·타입·진화·능력치 검색 - Pokédex',
+    description: '1~9세대 포켓몬을 한국어·영어 이름과 도감 번호로 검색하세요. 18가지 타입과 세대별 필터로 탐색하고, 진화·기본 능력치·특성을 확인하며 즐겨찾기를 모아보세요.',
     image: toCDN('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'),
     url: 'https://pokemon-drawing-book.com/',
 };

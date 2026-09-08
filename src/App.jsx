@@ -13,7 +13,7 @@ const PokemonDetail = React.lazy(() => import('./pages/PokemonDetail'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const Navbar = () => {
-  const { language, toggleLanguage, t } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const [theme, setTheme] = React.useState(() => localStorage.getItem('pokedex_theme') || 'dark');
 
   React.useEffect(() => {

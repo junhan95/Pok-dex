@@ -37,4 +37,6 @@ export const FavoritesProvider = ({ children }) => {
     );
 };
 
+// Context hooks intentionally share the provider module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFavorites = () => useContext(FavoritesContext);

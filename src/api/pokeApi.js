@@ -3,6 +3,22 @@
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
+const localizedResourceCache = new Map();
+export const fetchLocalizedResource = (resource, name) => {
+    const key = `${resource}/${name}`;
+    if (!localizedResourceCache.has(key)) {
+        const request = fetch(`${BASE_URL}/${key}`).then(response => {
+            if (!response.ok) throw new Error(`Unable to load ${key}`);
+            return response.json();
+        }).catch(error => {
+            localizedResourceCache.delete(key);
+            throw error;
+        });
+        localizedResourceCache.set(key, request);
+    }
+    return localizedResourceCache.get(key);
+};
+
 export const fetchPokemonList = async (limit = 20, offset = 0) => {
     try {
         const response = await fetch(`${BASE_URL}/pokemon?limit=${limit}&offset=${offset}`);

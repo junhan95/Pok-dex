@@ -5,7 +5,7 @@
 A beautiful, blazing-fast Pokédex web application built with **React + Vite**.  
 Browse **1,000+ Pokémon** across all 9 generations with full **Korean & English** language support.
 
-🌐 **[Live Demo → junhan95.github.io/Pok-dex](https://junhan95.github.io/Pok-dex/)**
+🌐 **[Live Demo → pokemon-drawing-book.com](https://pokemon-drawing-book.com/)**
 
 </div>
 
@@ -44,7 +44,7 @@ Browse **1,000+ Pokémon** across all 9 generations with full **Korean & English
 
 ### Prerequisites
 
-- **Node.js** 18+ ([download](https://nodejs.org))
+- **Node.js** 22.12+ ([download](https://nodejs.org))
 - **npm** 9+ (comes with Node.js)
 
 ### Installation
@@ -72,10 +72,10 @@ npm run build      # Creates optimized build in ./dist
 npm run preview    # Preview the production build locally
 ```
 
-### Deploy to GitHub Pages
+### Deploy to Cloudflare Pages
 
 ```bash
-npm run deploy     # Builds + publishes to gh-pages branch
+# Merge into main: GitHub Actions builds and deploys dist to Cloudflare Pages.
 ```
 
 ---
@@ -86,12 +86,12 @@ npm run deploy     # Builds + publishes to gh-pages branch
 |-------|-----------|
 | **Framework** | React 19 |
 | **Bundler** | Vite 7 |
-| **Routing** | React Router v7 (HashRouter) |
+| **Routing** | React Router v7 (BrowserRouter) |
 | **Animation** | Framer Motion |
 | **Icons** | React Icons |
 | **Styling** | Vanilla CSS with CSS Variables |
 | **API** | [PokéAPI](https://pokeapi.co/) (REST + GraphQL) |
-| **Deployment** | GitHub Pages + GitHub Actions CI/CD |
+| **Deployment** | Cloudflare Pages + GitHub Actions CI/CD |
 
 ---
 
@@ -140,7 +140,7 @@ These optimizations were implemented to ensure a smooth user experience:
 
 | Decision | Reasoning |
 |----------|-----------|
-| **HashRouter** over BrowserRouter | GitHub Pages doesn't support server-side routing; hash-based routing avoids 404s on page refresh |
+| **BrowserRouter** | Clean detail URLs with pre-rendered key pages and SPA fallback |
 | **GraphQL + REST hybrid** | GraphQL for bulk name/type data; REST for individual Pokémon details and species data |
 | **CSS Variables** over CSS-in-JS | Zero runtime cost, easy theming (dark/light), and type-specific color mapping |
 | **localStorage** for favorites | Simple, no backend required, persists across sessions |
@@ -173,7 +173,7 @@ Pok-dex/
 | `npm run dev` | Start development server with HMR |
 | `npm run build` | Create production build |
 | `npm run preview` | Preview production build locally |
-| `npm run deploy` | Build + deploy to GitHub Pages |
+| `npm run deploy` | Legacy GitHub Pages deployment; not the production deployment |
 | `npm run lint` | Run ESLint |
 
 ---
@@ -209,3 +209,11 @@ This project is open source and available under the [MIT License](LICENSE).
 Made with ❤️ by [junhan95](https://github.com/junhan95)
 
 </div>
+
+## Expanded Pokédex content
+
+The landing page includes a reference-image hero, search guidance, FAQs, and a trading-card collection with pointer-driven foil effects. Detail pages include translated abilities, shiny artwork, cries, defensive type matchups, species profiles, branched evolution paths with conditions, and on-demand game move/encounter lists.
+
+Data availability varies. Some game/location labels use API identifiers; historical move values and ability effects may differ from current API values. Favorites are browser-local. This is an unofficial fan project.
+
+Run regression checks with `node --test src/utils/*.test.js` and `npm run lint`. The production build includes sitemap generation and 43 pre-rendered routes. Confirm all routes render before publishing.
