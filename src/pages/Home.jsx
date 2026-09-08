@@ -117,6 +117,18 @@ const Home = () => {
         setCurrentPage(1);
     }, [debouncedSearch, selectedGen, showFavoritesOnly]);
 
+    const changePage = nextPage => {
+        setCurrentPage(nextPage);
+        requestAnimationFrame(() => {
+            const heading = document.getElementById('pokemon-list');
+            heading?.focus({ preventScroll: true });
+            heading?.scrollIntoView({
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+                block: 'start',
+            });
+        });
+    };
+
     const getPageNumbers = () => {
         const pages = [];
         const maxVisible = 5;
@@ -236,7 +248,7 @@ const Home = () => {
                                         <div className="pagination-container">
                                             <button
                                                 className="page-btn"
-                                                onClick={() => setCurrentPage(Math.max(page - 1, 1))}
+                                                onClick={() => changePage(Math.max(page - 1, 1))}
                                                 disabled={page === 1}
                                             >
                                                 &laquo;
@@ -246,7 +258,7 @@ const Home = () => {
                                                 <button
                                                     key={num}
                                                     className={`page-btn ${page === num ? 'active' : ''}`}
-                                                    onClick={() => setCurrentPage(num)}
+                                                    onClick={() => changePage(num)}
                                                 >
                                                     {num}
                                                 </button>
@@ -254,7 +266,7 @@ const Home = () => {
 
                                             <button
                                                 className="page-btn"
-                                                onClick={() => setCurrentPage(Math.min(page + 1, totalPages))}
+                                                onClick={() => changePage(Math.min(page + 1, totalPages))}
                                                 disabled={page === totalPages}
                                             >
                                                 &raquo;
