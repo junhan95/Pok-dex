@@ -192,7 +192,7 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+The adapted holographic stylesheet `src/styles/card-holo.css` is derived from Simon Goellner’s [pokemon-cards-css](https://github.com/simeydotme/pokemon-cards-css) (revision acb1197) and is provided under GPL-3.0. Its copyright notice is preserved in the source; the full license is available in [public/licenses/pokemon-cards-css-GPL-3.0.txt](public/licenses/pokemon-cards-css-GPL-3.0.txt). Source code for this deployed application is available in this repository. Pokémon names and artwork remain the property of their respective owners.
 
 ---
 
@@ -217,3 +217,7 @@ The landing page includes a reference-image hero, search guidance, FAQs, and a t
 Data availability varies. Some game/location labels use API identifiers; historical move values and ability effects may differ from current API values. Favorites are browser-local. This is an unofficial fan project.
 
 Run regression checks with `node --test src/utils/*.test.js` and `npm run lint`. The production build includes sitemap generation and 43 pre-rendered routes. Confirm all routes render before publishing.
+
+## Collection navigation and card information
+
+The navigation links to search, the card list, field guide, and usage guide, including from detail pages. Cards use the first Pokémon type to select one of 18 visual themes. The card header shows game base HP; the illustration caption carries the Pokédex number, classification, height, and weight. The lower panel displays the first non-hidden game ability, base stats, types, and a localized Pokédex entry. These values are video-game data, not TCG card statistics.

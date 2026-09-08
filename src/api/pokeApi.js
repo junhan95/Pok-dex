@@ -137,16 +137,8 @@ export const fetchPokemonDetails = async (nameOrId) => {
     }
 };
 
-export const fetchPokemonSpecies = async (nameOrId) => {
-    try {
-        const response = await fetch(`${BASE_URL}/pokemon-species/${nameOrId}`);
-        if (!response.ok) throw new Error(`Failed to fetch species for ${nameOrId}`);
-        return await response.json();
-    } catch (error) {
-        console.error(`Error fetching species for ${nameOrId}:`, error);
-        throw error;
-    }
-};
+// Share in-flight requests between collection cards and detail pages.
+export const fetchPokemonSpecies = (nameOrId) => fetchLocalizedResource('pokemon-species', nameOrId);
 
 export const fetchEvolutionChain = async (url) => {
     try {
