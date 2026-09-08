@@ -21,11 +21,11 @@ const Navbar = () => {
     ['field-guide', '필드가이드', 'Field guide'],
     ['usage-guide', '이용안내', 'How to use'],
   ];
-  const [theme, setTheme] = React.useState(() => localStorage.getItem('pokedex_theme') || 'dark');
+  const [theme, setTheme] = React.useState(() => { try { return localStorage.getItem('pokedex_theme') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; } });
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('pokedex_theme', theme);
+    try { localStorage.setItem('pokedex_theme', theme); } catch { /* Theme still works for this session. */ }
   }, [theme]);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -33,7 +33,7 @@ const Navbar = () => {
   return (
     <header className="glass site-header">
       <div className="container navbar-layout">
-        <Link to="/" style={{
+        <Link to="/#hero" style={{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
           textDecoration: 'none', color: 'var(--text-main)',
           fontSize: '1.5rem', fontWeight: 800

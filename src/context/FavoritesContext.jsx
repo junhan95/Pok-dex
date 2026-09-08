@@ -7,7 +7,8 @@ const STORAGE_KEY = 'pokedex_favorites';
 const loadFavorites = () => {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
+        const parsed = stored ? JSON.parse(stored) : [];
+        return Array.isArray(parsed) ? [...new Set(parsed.filter(id => Number.isInteger(id) && id > 0))] : [];
     } catch {
         return [];
     }
@@ -17,7 +18,7 @@ export const FavoritesProvider = ({ children }) => {
     const [favorites, setFavorites] = useState(loadFavorites);
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites)); } catch { /* Keep session favorites when storage is unavailable. */ }
     }, [favorites]);
 
     const toggleFavorite = (id) => {

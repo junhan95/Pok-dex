@@ -1,6 +1,7 @@
+import { matchesPokemon, clampPage } from '../utils/search';
 import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchAllPokemonWithNames, fetchPokemonType } from '../api/pokeApi';
+import { fetchAllPokemonWithNames } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
 import SkeletonGrid from '../components/SkeletonGrid';
 import DiscoveryGuide from '../components/DiscoveryGuide';
@@ -44,13 +45,13 @@ const Home = () => {
 
     // Data State
     const [allPokemonList, setAllPokemonList] = useState([]);
-    const [typeDataCache, setTypeDataCache] = useState({});
+    const [retry, setRetry] = useState(0);
     const [searchLoading, setSearchLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // Wait for the card grid to settle before scrolling to sections below it.
     useEffect(() => {
-        if (searchLoading || !location.hash) return;
+        if (!location.hash || (searchLoading && location.hash !== '#hero')) return;
         const target = document.getElementById(location.hash.slice(1));
         if (!target) return;
         target.focus({ preventScroll: true });
@@ -70,35 +71,22 @@ const Home = () => {
                 setAllPokemonList(data);
                 setError(null);
             } catch {
-                setError('Failed to load Pokémon. Please try again later.');
+                setError(true);
             } finally {
                 setSearchLoading(false);
             }
         };
         fetchAll();
-    }, []);
+    }, [retry]);
 
-    // Handle Type Selection
-    const toggleType = async (type) => {
-        const newSelected = selectedTypes.includes(type)
-            ? selectedTypes.filter(t => t !== type)
-            : [...selectedTypes, type];
-
-        setSelectedTypes(newSelected);
+    useEffect(() => {
+        setSearchTerm(new URLSearchParams(location.search).get('q') || '');
         setCurrentPage(1);
+    }, [location.search]);
 
-        if (!typeDataCache[type] && !selectedTypes.includes(type)) {
-            try {
-                setSearchLoading(true);
-                const data = await fetchPokemonType(type);
-                const pokemonNames = new Set(data.pokemon.map(p => p.pokemon.name));
-                setTypeDataCache(prev => ({ ...prev, [type]: pokemonNames }));
-            } catch (err) {
-                console.error("Error fetching type data:", err);
-            } finally {
-                setSearchLoading(false);
-            }
-        }
+    const toggleType = type => {
+        setSelectedTypes(previous => previous.includes(type) ? previous.filter(t => t !== type) : [...previous, type]);
+        setCurrentPage(1);
     };
 
     // Derived State: Filtering
@@ -113,31 +101,16 @@ const Home = () => {
             list = list.filter(p => p.gen === selectedGen);
         }
 
-        if (debouncedSearch) {
-            const lowerSearch = debouncedSearch.toLowerCase();
-            list = list.filter(p =>
-                p.name.includes(lowerSearch) || (p.ko && p.ko.includes(lowerSearch)) || String(p.id) === lowerSearch
-            );
-        }
-
-        if (selectedTypes.length > 0) {
-            list = list.filter(p => {
-                if (p.types && p.types.length > 0) {
-                    return selectedTypes.every(type => p.types.includes(type));
-                }
-                return selectedTypes.every(type => {
-                    const typeSet = typeDataCache[type];
-                    return typeSet ? typeSet.has(p.name) : false;
-                });
-            });
-        }
+        list = list.filter(p => matchesPokemon(p, debouncedSearch));
+        if (selectedTypes.length) list = list.filter(p => selectedTypes.every(type => p.types.includes(type)));
 
         return list;
-    }, [allPokemonList, debouncedSearch, selectedTypes, typeDataCache, selectedGen, showFavoritesOnly, favorites]);
+    }, [allPokemonList, debouncedSearch, selectedTypes, selectedGen, showFavoritesOnly, favorites]);
 
     // Pagination
     const totalPages = Math.ceil(displayList.length / itemsPerPage);
-    const paginatedList = displayList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const page = clampPage(currentPage, displayList.length, itemsPerPage);
+    const paginatedList = displayList.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -146,7 +119,7 @@ const Home = () => {
     const getPageNumbers = () => {
         const pages = [];
         const maxVisible = 5;
-        let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let start = Math.max(1, page - Math.floor(maxVisible / 2));
         let end = Math.min(totalPages, start + maxVisible - 1);
         if (end - start + 1 < maxVisible) {
             start = Math.max(1, end - maxVisible + 1);
@@ -160,7 +133,7 @@ const Home = () => {
     return (
         <>
             {/* Hero Banner */}
-            <section className="hero-banner" aria-labelledby="hero-title">
+            <section id="hero" tabIndex={-1} className="hero-banner" aria-labelledby="hero-title">
                 <div className="hero-panel">
                     <div className="hero-copy">
                         <span className="hero-eyebrow">THE POKÉDEX COLLECTION · {language === 'ko' ? '포켓몬 도감' : 'POKÉMON GUIDE'}</span>
@@ -207,47 +180,24 @@ const Home = () => {
                     </div>
                     <p id="search-hint" className="search-hint">{language === 'ko' ? '한국어·영어 검색 지원 · 카드를 선택하면 진화와 능력치를 볼 수 있어요.' : 'Korean & English names · Select a card for evolutions and stats.'}</p>
 
-                    {/* Filter Controls Row */}
-                    <div className="filter-controls-row">
-                        {/* Favorites Toggle */}
-                        <button
-                            className={`filter-chip ${showFavoritesOnly ? 'active' : ''}`}
-                            onClick={() => { setShowFavoritesOnly(prev => !prev); setCurrentPage(1); }}
-                        >
-                            ❤️ {language === 'ko' ? `즐겨찾기 (${favorites.length})` : `Favorites (${favorites.length})`}
-                        </button>
-
-                        {/* Generation Filter */}
-                        {GENERATIONS.map(gen => (
-                            <button
-                                key={gen.id}
-                                className={`filter-chip gen-chip ${selectedGen === gen.id ? 'active' : ''}`}
-                                onClick={() => { setSelectedGen(prev => prev === gen.id ? null : gen.id); setCurrentPage(1); }}
-                            >
-                                {gen.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Type Filters */}
-                    <div className="type-filter-container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                        {POKEMON_TYPES.map(type => (
-                            <button
-                                key={type}
-                                onClick={() => toggleType(type)}
-                                className={`type-filter-btn ${selectedTypes.includes(type) ? 'active' : ''}`}
-                                style={{ backgroundColor: `var(--type-${type})` }}
-                                aria-pressed={selectedTypes.includes(type)}
-                            >
-                                {t(`type_${type}`)} / {type.toUpperCase()}
-                            </button>
-                        ))}
-                    </div>
+                    <section className="dex-filter-panel" aria-label={language === 'ko' ? '포켓몬 검색 필터' : 'Pokémon search filters'}>
+                        <div className="dex-filter-toolbar">
+                            <div><strong>{language === 'ko' ? '조건으로 찾아보기' : 'Refine your search'}</strong><span>{language === 'ko' ? '세대와 타입을 조합해 보세요' : 'Combine a generation and types'}</span></div>
+                            <button className="dex-favorites" aria-pressed={showFavoritesOnly} onClick={() => {setShowFavoritesOnly(value => !value);setCurrentPage(1);}}><span aria-hidden="true">♡</span> {language === 'ko' ? '즐겨찾기만' : 'Favorites only'} <b>{favorites.length}</b></button>
+                        </div>
+                        <fieldset className="dex-filter-group"><legend>{language === 'ko' ? '세대' : 'Generation'} <small>{language === 'ko' ? '하나 선택' : 'Select one'}</small></legend>
+                            <div className="dex-generation-grid"><button className="dex-generation" aria-pressed={selectedGen === null} onClick={() => {setSelectedGen(null);setCurrentPage(1);}}>{language === 'ko' ? '전체' : 'All'}</button>{GENERATIONS.map(gen => <button key={gen.id} className="dex-generation" aria-pressed={selectedGen === gen.id} onClick={() => {setSelectedGen(value => value === gen.id ? null : gen.id);setCurrentPage(1);}} title={gen.range}>{language === 'ko' ? `${gen.id}세대` : gen.label}</button>)}</div>
+                        </fieldset>
+                        <fieldset className="dex-filter-group"><legend>{language === 'ko' ? '타입' : 'Type'} <small>{language === 'ko' ? '선택한 타입을 모두 포함' : 'Matches all selected types'}</small></legend>
+                            <div className="dex-type-grid">{POKEMON_TYPES.map(type => <button key={type} className="dex-type-choice" style={{'--filter-type': `var(--type-${type})`}} aria-pressed={selectedTypes.includes(type)} onClick={() => toggleType(type)}><span className="dex-type-dot" aria-hidden="true"/><span>{t(`type_${type}`)}</span><span className="dex-type-check" aria-hidden="true">{selectedTypes.includes(type) ? '✓' : '+'}</span></button>)}</div>
+                        </fieldset>
+                        <div className="dex-filter-bottom"><span aria-live="polite">{selectedGen === null && !selectedTypes.length && !showFavoritesOnly ? (language === 'ko' ? '모든 세대와 타입을 보고 있어요' : 'Showing all generations and types') : [selectedGen && (language === 'ko' ? `${selectedGen}세대` : `Gen ${selectedGen}`), ...selectedTypes.map(type => t(`type_${type}`)), showFavoritesOnly && (language === 'ko' ? '즐겨찾기' : 'Favorites')].filter(Boolean).join(' · ')}</span><button onClick={() => {setSelectedGen(null);setSelectedTypes([]);setShowFavoritesOnly(false);setCurrentPage(1);}} disabled={selectedGen === null && !selectedTypes.length && !showFavoritesOnly}>{language === 'ko' ? '조건 초기화' : 'Clear filters'}</button></div>
+                    </section>
 
                     {/* Content Area */}
                     <div className="results-heading" id="pokemon-list" tabIndex={-1}><h3>{showFavoritesOnly ? (language === 'ko' ? '내가 저장한 포켓몬' : 'Your favorites') : (language === 'ko' ? '포켓몬 목록' : 'Pokémon directory')}</h3><span role="status">{searchLoading ? (language === 'ko' ? '불러오는 중…' : 'Loading…') : `${displayList.length.toLocaleString()} ${language === 'ko' ? '개의 검색 결과' : 'results'}`}</span><button className="reset-filters" onClick={() => { setSearchTerm(''); setSelectedTypes([]); setSelectedGen(null); setShowFavoritesOnly(false); setCurrentPage(1); }}>{language === 'ko' ? '필터 초기화' : 'Reset filters'}</button></div>
                     {error && paginatedList.length === 0 ? (
-                        <div className="error-message" role="alert">{error}</div>
+                        <div className="error-message" role="alert"><p>{language === 'ko' ? '도감을 불러오지 못했습니다. 연결 상태를 확인하고 다시 시도하세요.' : 'Unable to load the Pokédex. Check your connection and try again.'}</p><button className="filter-chip" onClick={() => setRetry(value => value + 1)}>{language === 'ko' ? '다시 시도' : 'Retry'}</button></div>
                     ) : (
                         <div className="pokemon-grid-container" style={{ paddingTop: '0' }}>
 
@@ -285,8 +235,8 @@ const Home = () => {
                                         <div className="pagination-container">
                                             <button
                                                 className="page-btn"
-                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                                disabled={currentPage === 1}
+                                                onClick={() => setCurrentPage(Math.max(page - 1, 1))}
+                                                disabled={page === 1}
                                             >
                                                 &laquo;
                                             </button>
@@ -294,7 +244,7 @@ const Home = () => {
                                             {getPageNumbers().map(num => (
                                                 <button
                                                     key={num}
-                                                    className={`page-btn ${currentPage === num ? 'active' : ''}`}
+                                                    className={`page-btn ${page === num ? 'active' : ''}`}
                                                     onClick={() => setCurrentPage(num)}
                                                 >
                                                     {num}
@@ -303,8 +253,8 @@ const Home = () => {
 
                                             <button
                                                 className="page-btn"
-                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                                disabled={currentPage === totalPages}
+                                                onClick={() => setCurrentPage(Math.min(page + 1, totalPages))}
+                                                disabled={page === totalPages}
                                             >
                                                 &raquo;
                                             </button>

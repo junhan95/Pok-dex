@@ -1,3 +1,4 @@
+import { validCatalog } from '../utils/search.js';
 // pokeApi.js
 // Service to fetch data from PokeAPI
 
@@ -7,7 +8,7 @@ const localizedResourceCache = new Map();
 export const fetchLocalizedResource = (resource, name) => {
     const key = `${resource}/${name}`;
     if (!localizedResourceCache.has(key)) {
-        const request = fetch(`${BASE_URL}/${key}`).then(response => {
+        const request = fetch(`${BASE_URL}/${key}`, { signal: AbortSignal.timeout(15000) }).then(response => {
             if (!response.ok) throw new Error(`Unable to load ${key}`);
             return response.json();
         }).catch(error => {
@@ -32,7 +33,7 @@ export const fetchPokemonList = async (limit = 20, offset = 0) => {
 };
 
 let allPokemonCache = null;
-const CACHE_KEY_ALL_POKEMON = 'pokedex_all_pokemon_data';
+const CACHE_KEY_ALL_POKEMON = 'pokedex_all_pokemon_data_v2';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const fetchAllPokemonWithNames = async () => {
@@ -43,7 +44,7 @@ export const fetchAllPokemonWithNames = async () => {
         const cached = localStorage.getItem(CACHE_KEY_ALL_POKEMON);
         if (cached) {
             const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_TTL_MS) {
+            if (validCatalog(data) && Date.now() - timestamp >= 0 && Date.now() - timestamp < CACHE_TTL_MS) {
                 allPokemonCache = data;
                 return data;
             } else {
@@ -63,7 +64,7 @@ export const fetchAllPokemonWithNames = async () => {
           name
           language_id
         }
-        pokemons: pokemon_v2_pokemons(limit: 1) {
+        pokemons: pokemon_v2_pokemons(where: {is_default: {_eq: true}}, limit: 1) {
           types: pokemon_v2_pokemontypes(order_by: {slot: asc}) {
             type: pokemon_v2_type {
               name
@@ -77,9 +78,12 @@ export const fetchAllPokemonWithNames = async () => {
         const response = await fetch('https://beta.pokeapi.co/graphql/v1beta', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
+            body: JSON.stringify({ query }),
+            signal: AbortSignal.timeout(20000)
         });
+        if (!response.ok) throw new Error(`Catalog HTTP ${response.status}`);
         const json = await response.json();
+        if (json.errors || !Array.isArray(json.data?.pokemon)) throw new Error('Invalid catalog response');
 
         allPokemonCache = json.data.pokemon.map(species => {
             const enName = species.names.find(n => n.language_id === 9);
@@ -96,6 +100,8 @@ export const fetchAllPokemonWithNames = async () => {
             };
         });
 
+        if (!validCatalog(allPokemonCache)) { allPokemonCache = null; throw new Error('Incomplete catalog'); }
+
         // Save to cache
         try {
             localStorage.setItem(CACHE_KEY_ALL_POKEMON, JSON.stringify({
@@ -108,34 +114,12 @@ export const fetchAllPokemonWithNames = async () => {
 
         return allPokemonCache;
     } catch (e) {
-        console.error('GraphQL fetch failed, falling back to REST list', e);
-        const fallback = await fetchPokemonList(1300, 0);
-        allPokemonCache = fallback.results.map(p => {
-            const parts = p.url.split('/');
-            const id = parseInt(parts[parts.length - 2]);
-            return { id, name: p.name, ko: p.name, types: [] };
-        });
-        return allPokemonCache;
+        allPokemonCache = null;
+        throw e;
     }
 };
 
-const detailsCache = new Map();
-
-export const fetchPokemonDetails = async (nameOrId) => {
-    const key = String(nameOrId);
-    if (detailsCache.has(key)) return detailsCache.get(key);
-
-    try {
-        const response = await fetch(`${BASE_URL}/pokemon/${nameOrId}`);
-        if (!response.ok) throw new Error(`Failed to fetch details for ${nameOrId}`);
-        const data = await response.json();
-        detailsCache.set(key, data);
-        return data;
-    } catch (error) {
-        console.error(`Error fetching details for ${nameOrId}:`, error);
-        throw error;
-    }
-};
+export const fetchPokemonDetails = nameOrId => fetchLocalizedResource('pokemon', nameOrId);
 
 // Share in-flight requests between collection cards and detail pages.
 export const fetchPokemonSpecies = (nameOrId) => fetchLocalizedResource('pokemon-species', nameOrId);
