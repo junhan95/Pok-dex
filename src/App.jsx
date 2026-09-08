@@ -45,7 +45,7 @@ const Navbar = () => {
         </Link>
 
         <nav className="section-nav" aria-label={language === 'ko' ? '주요 메뉴' : 'Main navigation'}>
-          {menus.map(([id, ko, en]) => <Link key={id} to={id === 'club' ? '/club' : `/#${id}`} aria-current={id === 'club' ? (location.pathname === '/club' ? 'page' : undefined) : location.pathname === '/' && location.hash === `#${id}` ? 'location' : undefined}>{language === 'ko' ? ko : en}</Link>)}
+          {menus.map(([id, ko, en]) => <Link key={id} onClick={event=>{if(id==='club' && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button===0) window.scrollTo({top:0,left:0,behavior:'instant'});}} to={id === 'club' ? '/club' : `/#${id}`} aria-current={id === 'club' ? (location.pathname === '/club' ? 'page' : undefined) : location.pathname === '/' && location.hash === `#${id}` ? 'location' : undefined}>{language === 'ko' ? ko : en}</Link>)}
         </nav>
         <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { fetchAllPokemonWithNames, fetchPokemonDetails, fetchLocalizedResource, getPokemonImageUrl } from '../api/pokeApi';
 import { useLanguage } from '../context/LanguageContext';
@@ -24,6 +24,7 @@ function Comparison({ids, catalog, ko, language, t}) {
 }
 
 export default function Club(){
+ useLayoutEffect(()=>{window.scrollTo({top:0,left:0,behavior:'instant'});},[]);
  const {language,t}=useLanguage(); const ko=language==='ko'; const {favorites}=useFavorites(); const [params,setParams]=useSearchParams();
  useSEO({title:ko?'포켓몬 놀이터 · 비교와 공유 앨범':'Pokémon club · Compare and share', url:'https://pokemon-drawing-book.com/club'});
  const mode=params.get('mode')==='album'?'album':'compare'; const selected=cleanIds(params.get(mode==='album'?'ids':'compare'),mode==='album'?6:3);const title=(params.get('title')||'').slice(0,40);
