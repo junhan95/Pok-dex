@@ -17,22 +17,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate
+        run: npm run lint && node --test src/utils/*.test.js
+
       - name: Build
         run: npm run build
-
-      - name: Create Cloudflare Pages project
-        uses: cloudflare/wrangler-action@v3
-        continue-on-error: true
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages project create pokemon-drawing-book --production-branch main
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

@@ -2,6 +2,7 @@
 // Post-build script that uses Puppeteer to pre-render key pages to static HTML
 // This allows search engines to see fully rendered content without JS execution
 
+import process from 'node:process';
 import puppeteer from 'puppeteer';
 import { createServer } from 'http';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
@@ -85,8 +86,8 @@ async function prerender() {
 
     let rendered = 0;
     for (const route of ROUTES) {
+        const page = await browser.newPage();
         try {
-            const page = await browser.newPage();
             await page.goto(`http://localhost:${PORT}${route}`, {
                 waitUntil: 'networkidle0',
                 timeout: 30000,
@@ -97,9 +98,9 @@ async function prerender() {
 
             // For Pokemon detail pages, wait for the actual content to load
             if (route !== '/') {
-                try {
-                    await page.waitForSelector('.pokemon-detail-page', { timeout: 15000 });
-                } catch { /* homepage or loading state */ }
+                await page.waitForSelector('.pokemon-detail-page', { timeout: 15000 });
+            } else {
+                await page.waitForSelector('.tcg-card', { timeout: 20000 });
             }
 
             // Wait for dynamic meta tags to settle
@@ -117,15 +118,16 @@ async function prerender() {
 
             rendered++;
             console.log(`  ✅ [${rendered}/${ROUTES.length}] ${route}`);
-            await page.close();
+
         } catch (err) {
             console.error(`  ❌ Failed: ${route} - ${err.message}`);
-        }
+        } finally { await page.close(); }
     }
 
     await browser.close();
     server.close();
+    if (rendered !== ROUTES.length) process.exitCode = 1;
     console.log(`\n🎉 Prerendered ${rendered}/${ROUTES.length} pages`);
 }
 
-prerender().catch(console.error);
+prerender().catch(error => { console.error(error); process.exit(1); });
