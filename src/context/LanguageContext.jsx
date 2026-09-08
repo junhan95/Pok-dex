@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const LanguageContext = createContext();
 
@@ -89,6 +89,7 @@ const translations = {
 
 export const LanguageProvider = ({ children }) => {
     const [language, setLanguage] = useState('ko'); // Default to Korean as per user request context
+    useEffect(() => { document.documentElement.lang = language; }, [language]);
 
     const toggleLanguage = () => {
         setLanguage(prev => (prev === 'ko' ? 'en' : 'ko'));
@@ -105,4 +106,6 @@ export const LanguageProvider = ({ children }) => {
     );
 };
 
+// Context hooks intentionally share the provider module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLanguage = () => useContext(LanguageContext);

@@ -1,10 +1,12 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 const Loading = () => {
+    const { language } = useLanguage();
     return (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem', width: '100%' }}>
-            <motion.div
+            <Motion.div
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                 style={{
@@ -15,7 +17,7 @@ const Loading = () => {
                     borderRadius: '50%'
                 }}
                 role="status"
-                aria-label="Loading..."
+                aria-label={language === 'ko' ? '불러오는 중…' : 'Loading…'}
             />
         </div>
     );

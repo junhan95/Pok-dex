@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchAllPokemonWithNames, fetchPokemonType } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
 import SkeletonGrid from '../components/SkeletonGrid';
+import DiscoveryGuide from '../components/DiscoveryGuide';
 
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
@@ -33,7 +34,7 @@ const Home = () => {
     useSEO();
 
     // Search & Filter State
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get('q') || '');
     const debouncedSearch = useDebounce(searchTerm, 300);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedGen, setSelectedGen] = useState(null);
@@ -57,7 +58,7 @@ const Home = () => {
                 const data = await fetchAllPokemonWithNames();
                 setAllPokemonList(data);
                 setError(null);
-            } catch (err) {
+            } catch {
                 setError('Failed to load Pokémon. Please try again later.');
             } finally {
                 setSearchLoading(false);
@@ -148,18 +149,35 @@ const Home = () => {
     return (
         <>
             {/* Hero Banner */}
-            <div className="hero-banner">
-                <img src="/hero-banner.png" alt="Pokédex - 포켓몬 도감" className="hero-banner-img" />
-            </div>
+            <section className="hero-banner" aria-labelledby="hero-title">
+                <div className="hero-panel">
+                    <div className="hero-copy">
+                        <span className="hero-eyebrow">THE POKÉDEX COLLECTION · {language === 'ko' ? '포켓몬 도감' : 'POKÉMON GUIDE'}</span>
+                        <h1 id="hero-title">{language === 'ko' ? <>포켓몬 도감,<br /><em>발견하는 즐거움.</em></> : <>Explore the Pokédex.<br /><em>Find your favorites.</em></>}</h1>
+                        <p>{language === 'ko' ? '이름부터 타입, 진화까지. 포켓몬의 세계를 탐험하고 나만의 즐겨찾기를 채워보세요.' : 'Names, types, and evolutions. Explore the world of Pokémon and build your favorites.'}</p>
+                        <button className="hero-explore" onClick={() => document.getElementById('search-input')?.focus()}>
+                            {language === 'ko' ? '포켓몬 찾아보기' : 'Find a Pokémon'} <span aria-hidden="true">↗</span>
+                        </button>
+                        <div className="hero-facts"><span>{language === 'ko' ? '9개 세대' : '9 generations'}</span><span>{language === 'ko' ? '18가지 타입' : '18 types'}</span><span>KR / EN</span></div>
+                    </div>
+                    <div className="hero-art">
+                        <div className="hero-art-frame">
+                            <img src="/hero-pokemon-cast.jpg" alt={language === 'ko' ? '피카츄와 여러 포켓몬, 지우 일행이 함께한 일러스트' : 'Pikachu, Pokémon, Ash and friends together'} className="hero-banner-img" width="736" height="1308" fetchPriority="high" />
+                        </div>
+                        <span className="hero-art-caption">A WORLD OF POKÉMON</span>
+                    </div>
+                </div>
+            </section>
 
             <div className="main-layout">
                 <main className="main-content">
-                    <div style={{ textAlign: 'center', margin: '2rem 0 1.5rem' }}>
-                        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', background: 'linear-gradient(to right, var(--accent-primary), var(--accent-secondary))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            {t('welcome_title')}
-                        </h1>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-                            {t('welcome_desc')}
+                    <div className="section-heading dex-heading" id="pokedex">
+                        <span className="section-kicker">EXPLORE THE POKÉDEX</span>
+                        <h2>
+                            {language === 'ko' ? '어떤 포켓몬을 찾고 있나요?' : 'Who are you looking for?'}
+                        </h2>
+                        <p>
+                            {language === 'ko' ? '이름이나 도감 번호로 검색하고, 9개 세대와 18가지 타입으로 살펴보세요.' : 'Search by name or number. Explore 9 generations and 18 types.'}
                         </p>
                     </div>
 
@@ -169,18 +187,14 @@ const Home = () => {
                         <input
                             id="search-input"
                             type="text"
-                            placeholder={t('search_placeholder')}
+                            placeholder={language === 'ko' ? '예: 피카츄, pikachu, 25' : 'Try pikachu or 25'}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="search-input"
-                            style={{
-                                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                                border: '1px solid rgba(236, 72, 153, 0.3)',
-                                padding: '1.2rem 2rem',
-                                fontSize: '1.1rem'
-                            }}
+                            aria-describedby="search-hint"
                         />
                     </div>
+                    <p id="search-hint" className="search-hint">{language === 'ko' ? '한국어·영어 검색 지원 · 카드를 선택하면 진화와 능력치를 볼 수 있어요.' : 'Korean & English names · Select a card for evolutions and stats.'}</p>
 
                     {/* Filter Controls Row */}
                     <div className="filter-controls-row">
@@ -220,6 +234,7 @@ const Home = () => {
                     </div>
 
                     {/* Content Area */}
+                    <div className="results-heading"><h3>{showFavoritesOnly ? (language === 'ko' ? '내가 저장한 포켓몬' : 'Your favorites') : (language === 'ko' ? '포켓몬 목록' : 'Pokémon directory')}</h3><span role="status">{searchLoading ? (language === 'ko' ? '불러오는 중…' : 'Loading…') : `${displayList.length.toLocaleString()} ${language === 'ko' ? '개의 검색 결과' : 'results'}`}</span><button className="reset-filters" onClick={() => { setSearchTerm(''); setSelectedTypes([]); setSelectedGen(null); setShowFavoritesOnly(false); setCurrentPage(1); }}>{language === 'ko' ? '필터 초기화' : 'Reset filters'}</button></div>
                     {error && paginatedList.length === 0 ? (
                         <div className="error-message" role="alert">{error}</div>
                     ) : (
@@ -288,6 +303,7 @@ const Home = () => {
                             )}
                         </div>
                     )}
+                    <DiscoveryGuide />
                 </main>
             </div>
         </>

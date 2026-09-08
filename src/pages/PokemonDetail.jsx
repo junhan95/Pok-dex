@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchPokemonDetails, fetchPokemonSpecies, getPokemonImageUrl, fetchEvolutionChain, fetchAllPokemonWithNames } from '../api/pokeApi';
+import { fetchPokemonDetails, fetchPokemonSpecies, getPokemonImageUrl, fetchEvolutionChain, fetchAllPokemonWithNames, fetchLocalizedResource } from '../api/pokeApi';
 import Loading from '../components/Loading';
+import {PokemonMedia, PokemonInsights, EvolutionPaths} from '../components/PokemonContent';
+import PokemonGameData from '../components/PokemonGameData';
 import { useLanguage } from '../context/LanguageContext';
 import useSEO from '../hooks/useSEO';
 
@@ -16,32 +18,18 @@ const extractEvolutions = (node, acc = []) => {
     return acc;
 };
 
-// 폼 이름/레이블 파싱
-const getFormInfo = (variantName, baseKoName, baseName) => {
-    const suffix = variantName.replace(baseName + '-', '');
-    const map = {
-        'mega': { displayName: `메가${baseKoName}`, label: null },
-        'mega-x': { displayName: `메가${baseKoName} X`, label: null },
-        'mega-y': { displayName: `메가${baseKoName} Y`, label: null },
-        'gmax': { displayName: baseKoName, label: '거다이맥스의 모습' },
-        'alola': { displayName: baseKoName, label: '알로라의 모습' },
-        'galar': { displayName: baseKoName, label: '가라르의 모습' },
-        'hisui': { displayName: baseKoName, label: '히스이의 모습' },
-        'paldea': { displayName: baseKoName, label: '팔데아의 모습' },
-        'paldea-combat': { displayName: baseKoName, label: '팔데아의 모습 (격투)' },
-        'paldea-blaze': { displayName: baseKoName, label: '팔데아의 모습 (화염)' },
-        'paldea-aqua': { displayName: baseKoName, label: '팔데아의 모습 (수중)' },
-    };
-    return map[suffix] || { displayName: variantName, label: null };
-};
+import { localizedName, formInfo } from '../utils/pokemonLocalization';
 
 const PokemonDetail = () => {
     const { id } = useParams();
     const { language, t } = useLanguage();
     const [pokemon, setPokemon] = useState(null);
     const [species, setSpecies] = useState(null);
+    const [evolutionTree, setEvolutionTree] = useState(null);
     const [evolutions, setEvolutions] = useState([]);
     const [forms, setForms] = useState([]);
+    const [abilityNames, setAbilityNames] = useState({});
+    const [currentForm, setCurrentForm] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -50,14 +38,24 @@ const PokemonDetail = () => {
     }, [id]);
 
     useEffect(() => {
+        let active = true;
         const fetchData = async () => {
             try {
                 setLoading(true);
+                setEvolutionTree(null); setEvolutions([]); setForms([]); setAbilityNames({}); setCurrentForm(null);
                 const pokeData = await fetchPokemonDetails(id);
                 const speciesId = parseInt(pokeData.species.url.split('/').filter(Boolean).pop());
                 const speciesData = await fetchPokemonSpecies(speciesId);
+                if (!active) return;
                 setPokemon(pokeData);
                 setSpecies(speciesData);
+
+                const abilityEntries = await Promise.all(pokeData.abilities.map(async a => [a.ability.name, await fetchLocalizedResource('ability', a.ability.name).catch(() => null)]));
+                if (!active) return;
+                setAbilityNames(Object.fromEntries(abilityEntries));
+                const formData = pokeData.forms?.[0] ? await fetchLocalizedResource('pokemon-form', pokeData.forms[0].name).catch(() => null) : null;
+                if (!active) return;
+                setCurrentForm(formData);
 
                 // 진화 체인
                 if (speciesData && speciesData.evolution_chain?.url) {
@@ -65,7 +63,9 @@ const PokemonDetail = () => {
                     const evoIds = extractEvolutions(evoData.chain);
                     const allPokemon = await fetchAllPokemonWithNames();
                     const lineage = evoIds.map(eId => allPokemon.find(p => p.id === eId)).filter(Boolean);
+                    if (!active) return;
                     setEvolutions(lineage);
+                    setEvolutionTree(evoData.chain);
                 }
 
                 // 모습(폼) – 기본종 기준으로 조회 (폼페이지에서도 올바르게 동작)
@@ -74,84 +74,78 @@ const PokemonDetail = () => {
                         speciesData.varieties.map(async (v) => {
                             const fId = parseInt(v.pokemon.url.split('/').filter(Boolean).pop());
                             const details = await fetchPokemonDetails(v.pokemon.name);
+                            const localized = details.forms?.[0] ? await fetchLocalizedResource('pokemon-form', details.forms[0].name).catch(() => null) : null;
                             return {
                                 id: fId,
                                 name: v.pokemon.name,
                                 isDefault: v.is_default,
+                                localized,
                                 types: details.types.map(t => t.type.name),
                             };
                         })
                     );
+                    if (!active) return;
                     setForms(formDetails);
                 }
 
                 setError(null);
-            } catch (err) {
-                setError("Failed to load Pokémon details. It might not exist.");
+            } catch {
+                if (active) setError(true);
             } finally {
-                setLoading(false);
+                if (active) setLoading(false);
             }
         };
         fetchData();
+        return () => { active = false; };
     }, [id]);
 
     const langKey = language === 'ko' ? 'ko' : 'en';
     const flavorTextEntry = species?.flavor_text_entries?.find(entry => entry.language.name === langKey) || species?.flavor_text_entries?.find(entry => entry.language.name === 'en');
-    const description = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/\f|\n/g, ' ') : '';
+    const description = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/\s+/g, ' ') : (language === 'ko' ? '제공되는 도감 설명이 없습니다.' : 'No Pokédex description is available.');
     const speciesLocalName = species?.names?.find(n => n.language.name === langKey)?.name || pokemon?.name || '';
     // 폼 페이지 진입 시: species 영문명과 pokemon 영문명이 다르면 폼 표시명 적용
     const isForm = pokemon && species && pokemon.name !== species.name;
     const localName = isForm
-        ? getFormInfo(pokemon.name, speciesLocalName, species.name).displayName
+        ? formInfo(currentForm, speciesLocalName, language).displayName
         : speciesLocalName;
 
     const seoDescription = (() => {
         if (!pokemon) return '';
-        const types = pokemon.types?.map(t => t.type.name).join('/') || '';
+        const types = pokemon.types?.map(type => t(`type_${type.type.name}`)).join('/') || '';
         const stats = pokemon.stats?.map(s => {
-            const names = { hp: 'HP', attack: '공격', defense: '방어', 'special-attack': '특공', 'special-defense': '특방', speed: '스피드' };
-            return `${names[s.stat.name] || s.stat.name} ${s.base_stat}`;
+            return `${t(`stat_${s.stat.name}`)} ${s.base_stat}`;
         }).join(' / ') || '';
         const size = `${pokemon.height / 10}m, ${pokemon.weight / 10}kg`;
-        const evoNames = evolutions.length > 1 ? evolutions.map(e => e.ko || e.name).join(' → ') : '';
+        const evoNames = evolutions.length > 1 ? evolutions.map(e => language === 'ko' ? (e.ko || e.name) : e.name).join(', ') : '';
         const parts = [
             `${localName} #${String(pokemon.id).padStart(4, '0')}`,
-            types ? `타입: ${types}` : '',
-            stats ? `능력치: ${stats}` : '',
+            types ? `${language === 'ko' ? '타입' : 'Types'}: ${types}` : '',
+            stats ? `${t('base_stats')}: ${stats}` : '',
             size,
-            evoNames ? `진화: ${evoNames}` : '',
+            evoNames ? `${language === 'ko' ? '진화' : 'Evolution'}: ${evoNames}` : '',
         ].filter(Boolean);
         return parts.join(' | ');
     })();
 
     useSEO(pokemon ? {
-        title: `${localName} #${String(pokemon.id).padStart(4, '0')} | Pokédex - 포켓몬 도감`,
+        title: `${localName} #${String(pokemon.id).padStart(4, '0')} | ${language === 'ko' ? 'Pokédex - 포켓몬 도감' : 'Pokédex'}`,
         description: seoDescription,
         image: getPokemonImageUrl(pokemon.id),
         url: `https://pokemon-drawing-book.com/pokemon/${pokemon.id}`,
     } : undefined);
 
     if (loading) return <main className="container" style={{ padding: '4rem 0' }}><Loading /></main>;
-    if (error) return <main className="container"><div className="error-message">{error}</div></main>;
+    if (error) return <main className="container"><div className="error-message" role="alert">{language === 'ko' ? '포켓몬 정보를 불러오지 못했습니다. 주소를 확인하거나 잠시 후 다시 시도하세요.' : 'Unable to load this Pokémon. Check the address or try again later.'}</div><Link to="/" className="btn-back">{t('back')}</Link></main>;
     if (!pokemon) return null;
 
-    const primaryImage = getPokemonImageUrl(pokemon.id);
-    const fallbackImage = pokemon.sprites?.other?.['official-artwork']?.front_default || pokemon.sprites?.front_default;
-    const baseName = species?.name || pokemon.name; // 항상 기본종 영문명 사용
+
 
     return (
         <main className="container pokemon-detail-page">
             <Link to="/" className="btn-back">{t('back')}</Link>
 
             <div className="pokemon-detail-header glass">
-                <div className="pokemon-detail-image-wrapper">
-                    <img
-                        src={primaryImage}
-                        alt={localName}
-                        onError={(e) => { e.target.onerror = null; e.target.src = fallbackImage; }}
-                        className="pokemon-detail-image"
-                    />
-                </div>
+                <PokemonMedia key={pokemon.id} pokemon={pokemon} name={localName} />
 
                 <div className="pokemon-detail-info">
                     <span className="pokemon-detail-id">#{String(pokemon.id).padStart(4, '0')}</span>
@@ -165,7 +159,9 @@ const PokemonDetail = () => {
                         ))}
                     </div>
 
-                    <p className="pokemon-description">{description}</p>
+                    <p className="pokemon-description" lang={flavorTextEntry?.language.name || language}>{description}</p>
+                    {flavorTextEntry && flavorTextEntry.language.name !== language && <p>{language === 'ko' ? '한국어 설명이 없어 영어 원문을 표시합니다.' : 'Showing the available original description.'}</p>}
+                    {isForm && formInfo(currentForm, speciesLocalName, language).label && <p className="form-label">{formInfo(currentForm, speciesLocalName, language).label}</p>}
 
                     <div className="pokemon-physical-stats">
                         <div className="stat-box">
@@ -179,12 +175,14 @@ const PokemonDetail = () => {
                         <div className="stat-box">
                             <span className="stat-label">{t('abilities')}</span>
                             <span className="stat-value" style={{ textTransform: 'capitalize' }}>
-                                {pokemon.abilities.map(a => a.ability.name.replace('-', ' ')).join(', ')}
+                                {pokemon.abilities.map(a => `${localizedName(abilityNames[a.ability.name]?.names, language, a.ability.name.replaceAll('-', ' '))}${a.is_hidden ? (language === 'ko' ? ' (숨겨진 특성)' : ' (Hidden Ability)') : ''}`).join(', ')}
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <PokemonInsights key={pokemon.id} pokemon={pokemon} species={species} abilities={abilityNames} />
 
             <div className="pokemon-base-stats glass">
                 <h2>{t('base_stats')}</h2>
@@ -201,6 +199,7 @@ const PokemonDetail = () => {
                                         backgroundColor: `var(--type-${pokemon.types[0].type.name})`
                                     }}
                                     role="progressbar"
+                                    aria-label={t(`stat_${stat.stat.name}`)}
                                     aria-valuenow={stat.base_stat}
                                     aria-valuemin="0"
                                     aria-valuemax="255"
@@ -211,44 +210,7 @@ const PokemonDetail = () => {
                 </div>
             </div>
 
-            {/* 진화 섹션 */}
-            {evolutions.length > 1 && (
-                <div className="pokemon-section">
-                    <h2 className="section-title">
-                        <span className="section-title-icon">🔴</span>
-                        {language === 'ko' ? '진화' : 'Evolution'}
-                    </h2>
-                    <div className="evo-chain">
-                        {evolutions.map((evo, index) => (
-                            <React.Fragment key={evo.id}>
-                                <Link to={`/pokemon/${evo.id}`} className="evo-card">
-                                    <div className="evo-img-wrap" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '120px' }}>
-                                        <img
-                                            src={getPokemonImageUrl(evo.id)}
-                                            alt={evo.ko || evo.name}
-                                            className="evo-card-img"
-                                            style={{ width: '110px', height: '110px', objectFit: 'contain' }}
-                                            onError={(e) => { e.target.onerror = null; e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${evo.id}.png`; }}
-                                        />
-                                    </div>
-                                    <p className="evo-card-no">No. {String(evo.id).padStart(4, '0')}</p>
-                                    <p className="evo-card-name">{evo.ko || evo.name}</p>
-                                    <div className="evo-card-types">
-                                        {evo.types.map(typeName => (
-                                            <span key={typeName} className="type-badge" style={{ backgroundColor: `var(--type-${typeName})` }}>
-                                                {t(`type_${typeName}`)}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </Link>
-                                {index < evolutions.length - 1 && (
-                                    <span className="evo-arrow">›</span>
-                                )}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </div>
-            )}
+            <EvolutionPaths key={pokemon.id} tree={evolutionTree} names={evolutions} />
 
             {/* 모습(폼) 섹션 */}
             {forms.length > 1 && (
@@ -261,7 +223,7 @@ const PokemonDetail = () => {
                         {forms.map((form) => {
                             const { displayName, label } = form.isDefault
                                 ? { displayName: speciesLocalName, label: null }
-                                : getFormInfo(form.name, speciesLocalName, baseName);
+                                : formInfo(form.localized, speciesLocalName, language);
                             return (
                                 <Link key={form.id} to={`/pokemon/${form.id}`} className="evo-card">
                                     <div className="evo-img-wrap" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '120px' }}>
@@ -289,6 +251,7 @@ const PokemonDetail = () => {
                     </div>
                 </div>
             )}
+            <PokemonGameData key={pokemon.id} pokemon={pokemon} />
         </main>
     );
 };

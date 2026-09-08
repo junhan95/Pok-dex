@@ -4,7 +4,7 @@
 
 import puppeteer from 'puppeteer';
 import { createServer } from 'http';
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, join, extname } from 'path';
 
 const DIST_DIR = resolve('dist');
