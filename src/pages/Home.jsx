@@ -1,5 +1,6 @@
 import { matchesPokemon, clampPage } from '../utils/search';
-import { useLocation } from 'react-router-dom';
+import './club.css';
+import { Link, useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchAllPokemonWithNames } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
@@ -264,6 +265,7 @@ const Home = () => {
                             )}
                         </div>
                     )}
+                    <section className="club-home"><h2>{language === 'ko' ? '좋아하는 포켓몬으로, 나만의 이야기' : 'Your Pokémon. Your story.'}</h2><p>{language === 'ko' ? '서로 비교하고, 테마로 발견하고, 친구에게 내 앨범을 보여주세요.' : 'Compare, explore themes, and show friends your collection.'}</p><div className="club-home-links"><Link to="/club"><strong>{language === 'ko' ? '포켓몬 비교 ↗' : 'Compare Pokémon ↗'}</strong><small>{language === 'ko' ? '최대 3마리의 능력치와 특성을 나란히' : 'Compare stats and abilities of up to 3 Pokémon'}</small></Link><Link to="/club?theme=eevee"><strong>{language === 'ko' ? '테마별 도감 ↗' : 'Theme collections ↗'}</strong><small>{language === 'ko' ? '이브이 진화부터 첫 파트너까지' : 'From Eevee evolutions to first partners'}</small></Link><Link to="/club?mode=album"><strong>{language === 'ko' ? '공유 앨범 만들기 ↗' : 'Create a shared album ↗'}</strong><small>{language === 'ko' ? '여섯 친구를 고르고 링크로 공유' : 'Pick six friends and share a link'}</small></Link></div></section>
                     <DiscoveryGuide />
                 </main>
             </div>
