@@ -10,6 +10,7 @@ import BuyMeACoffee from './components/BuyMeACoffee';
 import './index.css';
 
 const PokemonDetail = React.lazy(() => import('./pages/PokemonDetail'));
+const Club = React.lazy(() => import('./pages/Club'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const Navbar = () => {
@@ -18,6 +19,7 @@ const Navbar = () => {
   const menus = [
     ['pokedex', '포켓몬찾기', 'Find Pokémon'],
     ['pokemon-list', '포켓몬 목록', 'Pokémon list'],
+    ['club', '놀이터', 'Club'],
     ['field-guide', '필드가이드', 'Field guide'],
     ['usage-guide', '이용안내', 'How to use'],
   ];
@@ -43,7 +45,7 @@ const Navbar = () => {
         </Link>
 
         <nav className="section-nav" aria-label={language === 'ko' ? '주요 메뉴' : 'Main navigation'}>
-          {menus.map(([id, ko, en]) => <Link key={id} to={`/#${id}`} aria-current={location.pathname === '/' && location.hash === `#${id}` ? 'location' : undefined}>{language === 'ko' ? ko : en}</Link>)}
+          {menus.map(([id, ko, en]) => <Link key={id} to={id === 'club' ? '/club' : `/#${id}`} aria-current={id === 'club' ? (location.pathname === '/club' ? 'page' : undefined) : location.pathname === '/' && location.hash === `#${id}` ? 'location' : undefined}>{language === 'ko' ? ko : en}</Link>)}
         </nav>
         <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button
@@ -104,6 +106,7 @@ function App() {
             <Suspense fallback={<main className="container" style={{ padding: '4rem 0' }}><Loading /></main>}>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/club" element={<Club />} />
                 <Route path="/pokemon/:id" element={<PokemonDetail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

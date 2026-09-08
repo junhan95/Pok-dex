@@ -1272,3 +1272,5 @@ a.evo-card:hover {
 .dex-filter-bottom button:disabled { opacity: .4; cursor: default; }
 @media (max-width: 760px) { .dex-generation-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } .dex-type-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .dex-filter-panel { padding: 18px; } }
 @media (max-width: 400px) { .dex-filter-toolbar { align-items: flex-start; flex-direction: column; } .dex-type-choice { padding: 8px; gap: 5px; font-size: 11px; } }
+
+@media(max-width:900px) { .section-nav { grid-template-columns: repeat(5,minmax(0,1fr)); } }
