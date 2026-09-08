@@ -1,0 +1,95 @@
+/* Type themes inspired by the reference's regular, cosmos, radiant and rainbow
+ * foil families. Each primary type has its own palette, angle and texture scale.
+ * The artwork stays above the foil; captions and details are outside the effect.
+ */
+.tcg-card[data-holo-type="normal"] { --holo-a: #fff5d5; --holo-b: #afbbd0; --holo-angle: 25deg; --holo-cell: 44px; }
+.tcg-card[data-holo-type="fire"] { --holo-a: #ff6d24; --holo-b: #ffe785; --holo-angle: 0deg; --holo-cell: 28px; }
+.tcg-card[data-holo-type="water"] { --holo-a: #299cfa; --holo-b: #a7f5ff; --holo-angle: 0deg; --holo-cell: 30px; }
+.tcg-card[data-holo-type="electric"] { --holo-a: #fff235; --holo-b: #c6f5ff; --holo-angle: 12deg; --holo-cell: 12px; }
+.tcg-card[data-holo-type="grass"] { --holo-a: #47bb6a; --holo-b: #e6fa9b; --holo-angle: 35deg; --holo-cell: 25px; }
+.tcg-card[data-holo-type="ice"] { --holo-a: #8ce6ff; --holo-b: #f7ffff; --holo-angle: 60deg; --holo-cell: 23px; }
+.tcg-card[data-holo-type="fighting"] { --holo-a: #f37550; --holo-b: #f7c989; --holo-angle: -18deg; --holo-cell: 42px; }
+.tcg-card[data-holo-type="poison"] { --holo-a: #b35bdf; --holo-b: #b5f78a; --holo-angle: 35deg; --holo-cell: 37px; }
+.tcg-card[data-holo-type="ground"] { --holo-a: #d69c65; --holo-b: #ffe5a8; --holo-angle: 80deg; --holo-cell: 42px; }
+.tcg-card[data-holo-type="flying"] { --holo-a: #aecaff; --holo-b: #ffffff; --holo-angle: -25deg; --holo-cell: 48px; }
+.tcg-card[data-holo-type="psychic"] { --holo-a: #f073ce; --holo-b: #a9a8ff; --holo-angle: 0deg; --holo-cell: 28px; }
+.tcg-card[data-holo-type="bug"] { --holo-a: #aace36; --holo-b: #ddf7a1; --holo-angle: -35deg; --holo-cell: 15px; }
+.tcg-card[data-holo-type="rock"] { --holo-a: #bea77b; --holo-b: #f2e5bf; --holo-angle: 30deg; --holo-cell: 39px; }
+.tcg-card[data-holo-type="ghost"] { --holo-a: #8272d9; --holo-b: #b8e3ff; --holo-angle: 70deg; --holo-cell: 46px; }
+.tcg-card[data-holo-type="dragon"] { --holo-a: #8666ea; --holo-b: #68d8ee; --holo-angle: 55deg; --holo-cell: 32px; }
+.tcg-card[data-holo-type="dark"] { --holo-a: #69538d; --holo-b: #bad2dd; --holo-angle: 110deg; --holo-cell: 61px; }
+.tcg-card[data-holo-type="steel"] { --holo-a: #9dacbd; --holo-b: #ffffff; --holo-angle: 45deg; --holo-cell: 13px; }
+.tcg-card[data-holo-type="fairy"] { --holo-a: #f6a8d7; --holo-b: #fff3b7; --holo-angle: -35deg; --holo-cell: 22px; }
+
+.tcg-card[data-holo] .tcg-foil {
+  background-blend-mode: soft-light;
+  background-position: var(--foil-x) var(--foil-y);
+  background-size: 220% 220%;
+  filter: saturate(1.1) contrast(1.3);
+  mix-blend-mode: hard-light;
+}
+.tcg-card[data-holo] .tcg-foil::before {
+  content: ''; background-blend-mode: screen; filter: none;
+  background-position: var(--pointer-x) var(--pointer-y);
+  background-size: 180% 180%; mix-blend-mode: screen; opacity: .65;
+}
+.tcg-card[data-holo] .tcg-foil::after {
+  background: radial-gradient(ellipse at var(--pointer-x) var(--pointer-y), #ffffffa0, #ffffff10 35%, #07152e99 100%);
+  mix-blend-mode: overlay; filter: none;
+}
+/* Flame pillars, electrical streaks and copper light bars. */
+.tcg-card[data-holo="beam"] .tcg-foil {
+  background-image: repeating-linear-gradient(var(--holo-angle), #17152b 0%, var(--holo-a) 9%, var(--holo-b) 11%, #fff 12%, var(--holo-a) 14%, #111b31 22%);
+  mix-blend-mode: color-dodge;
+}
+.tcg-card[data-holo="beam"] .tcg-foil::before {
+  background-image: repeating-linear-gradient(90deg, transparent 0 9px, #fff8 10px, transparent 12px var(--holo-cell));
+}
+/* Water caustics / long, airy ripples. */
+.tcg-card[data-holo="wave"] .tcg-foil {
+  background-image: repeating-radial-gradient(ellipse at 20% 120%, #13284b 0%, var(--holo-a) 7%, var(--holo-b) 9%, #fff 10%, var(--holo-a) 12%, #13284b 18%);
+}
+.tcg-card[data-holo="wave"] .tcg-foil::before {
+  background-image: repeating-radial-gradient(ellipse at 90% -20%, transparent 0 18px, #fff9 20px, transparent 23px var(--holo-cell));
+  transform: rotate(var(--holo-angle)) scale(1.2);
+}
+/* Etched leaves, insect mesh and sediment contours. */
+.tcg-card[data-holo="etched"] .tcg-foil {
+  background-image: repeating-conic-gradient(from var(--holo-angle) at 50% 100%, var(--holo-a) 0deg, #173f25 12deg, var(--holo-b) 16deg, var(--holo-a) 20deg);
+}
+.tcg-card[data-holo="etched"] .tcg-foil::before {
+  background-image: repeating-linear-gradient(var(--holo-angle), transparent 0 6px, #fff6 7px, transparent 8px), repeating-linear-gradient(calc(180deg - var(--holo-angle)), transparent 0 12px, #fff4 13px, transparent 14px);
+  background-size: var(--holo-cell) var(--holo-cell);
+}
+/* Radiant facets: icy diamonds, mineral planes and brushed steel. */
+.tcg-card[data-holo="crystal"] .tcg-foil {
+  background-image: repeating-conic-gradient(from var(--holo-angle), var(--holo-a) 0deg, #283746 45deg, var(--holo-b) 90deg);
+  background-size: calc(var(--holo-cell) * 3) calc(var(--holo-cell) * 4);
+}
+.tcg-card[data-holo="crystal"] .tcg-foil::before {
+  background-image: linear-gradient(120deg, transparent 25%, #fff 48%, transparent 63%);
+  background-size: 250% 250%;
+}
+/* Cosmos: continuous gaseous halos and spectral reflections. */
+.tcg-card[data-holo="cosmos"] .tcg-foil {
+  background-image: radial-gradient(ellipse at var(--pointer-x) var(--pointer-y), var(--holo-b), transparent 35%), conic-gradient(from var(--holo-angle), #111225, var(--holo-a), #121627, var(--holo-b), #111225);
+}
+/* No tiled star dots: retain only the continuous spectral and glare layers. */
+.tcg-card[data-holo="cosmos"] .tcg-foil::before {
+  content: none;
+}
+/* Rainbow spectral foil and pearl satin. */
+.tcg-card[data-holo="rainbow"] .tcg-foil {
+  background-image: repeating-linear-gradient(var(--holo-angle), var(--holo-a), #90ddf9 12%, #b4f3b0 24%, var(--holo-b) 36%, #f8a7ce 48%, var(--holo-a) 60%);
+}
+.tcg-card[data-holo="rainbow"] .tcg-foil::before {
+  background-image: repeating-conic-gradient(from var(--holo-angle), #fff9 0deg 4deg, transparent 4deg 90deg);
+  background-size: var(--holo-cell) var(--holo-cell);
+}
+.tcg-card[data-holo="pearl"] .tcg-foil {
+  background-image: conic-gradient(from 30deg at var(--pointer-x) var(--pointer-y), var(--holo-a), var(--holo-b), #e1cbe6, #fffde5, var(--holo-b), var(--holo-a));
+  filter: saturate(.65);
+}
+.tcg-card[data-holo="pearl"] .tcg-foil::before {
+  background-image: radial-gradient(ellipse, #fff9, transparent 60%);
+}

@@ -1,0 +1,21 @@
+// Visual themes only; these are not official TCG rarity assignments.
+export const TYPE_HOLO = {
+    normal: { family: 'pearl' },
+    fire: { family: 'beam' },
+    water: { family: 'wave' },
+    electric: { family: 'beam' },
+    grass: { family: 'etched' },
+    ice: { family: 'crystal' },
+    fighting: { family: 'beam' },
+    poison: { family: 'cosmos' },
+    ground: { family: 'etched' },
+    flying: { family: 'wave' },
+    psychic: { family: 'cosmos' },
+    bug: { family: 'etched' },
+    rock: { family: 'crystal' },
+    ghost: { family: 'cosmos' },
+    dragon: { family: 'rainbow' },
+    dark: { family: 'cosmos' },
+    steel: { family: 'crystal' },
+    fairy: { family: 'rainbow' },
+};

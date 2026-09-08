@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { CgPokemon } from 'react-icons/cg';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { FavoritesProvider } from './context/FavoritesContext';
@@ -14,6 +14,13 @@ const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 const Navbar = () => {
   const { language, toggleLanguage } = useLanguage();
+  const location = useLocation();
+  const menus = [
+    ['pokedex', '포켓몬찾기', 'Find Pokémon'],
+    ['pokemon-list', '포켓몬 목록', 'Pokémon list'],
+    ['field-guide', '필드가이드', 'Field guide'],
+    ['usage-guide', '이용안내', 'How to use'],
+  ];
   const [theme, setTheme] = React.useState(() => localStorage.getItem('pokedex_theme') || 'dark');
 
   React.useEffect(() => {
@@ -24,11 +31,8 @@ const Navbar = () => {
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   return (
-    <header className="glass" style={{
-      position: 'sticky', top: 0, zIndex: 100,
-      padding: '1rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)'
-    }}>
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <header className="glass site-header">
+      <div className="container navbar-layout">
         <Link to="/" style={{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
           textDecoration: 'none', color: 'var(--text-main)',
@@ -38,7 +42,10 @@ const Navbar = () => {
           Pokédex
         </Link>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <nav className="section-nav" aria-label={language === 'ko' ? '주요 메뉴' : 'Main navigation'}>
+          {menus.map(([id, ko, en]) => <Link key={id} to={`/#${id}`} aria-current={location.pathname === '/' && location.hash === `#${id}` ? 'location' : undefined}>{language === 'ko' ? ko : en}</Link>)}
+        </nav>
+        <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button
             onClick={toggleTheme}
             className="lang-toggle-btn"
@@ -63,7 +70,7 @@ const Navbar = () => {
           >
             {language === 'ko' ? 'EN' : 'KR'}
           </button>
-        </nav>
+        </div>
       </div>
     </header>
   );

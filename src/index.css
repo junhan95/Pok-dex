@@ -1115,14 +1115,16 @@ a.evo-card:hover {
 }
 
 /* Trading-card collection. Foil follows the pointer without React re-renders. */
+.tcg-slot { position: relative; min-width: 0; aspect-ratio: 63 / 88; }
 .tcg-card {
+  --foil-x: 50%; --foil-y: 50%;
   --pointer-x: 50%; --pointer-y: 50%; --rotate-x: 0deg; --rotate-y: 0deg;
-  position: relative; aspect-ratio: 63 / 88; min-width: 0; border-radius: 16px;
+  position: relative; height: 100%; aspect-ratio: 63 / 88; min-width: 0; border-radius: 16px;
   padding: 7px; isolation: isolate;
   background: linear-gradient(125deg, #ab8134, #fff1a1 20%, #ccac56 38%, #fff5b7 53%, #b98b38 75%, #e9d68b);
   box-shadow: 0 8px 20px #0005, inset 0 0 0 1px #ffedb6;
   transform: perspective(900px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
-  transition: transform .22s ease, box-shadow .22s ease;
+  transition: box-shadow .3s ease;
 }
 .tcg-link { display: block; height: 100%; border-radius: 10px; overflow: hidden; color: #18252c; text-decoration: none; position: relative; }
 .tcg-surface { height: 100%; display: flex; flex-direction: column; background: linear-gradient(145deg, #fff8d9, color-mix(in srgb, var(--card-type) 42%, #fffbe8)); }
@@ -1145,20 +1147,15 @@ a.evo-card:hover {
 .tcg-footer { display: flex; justify-content: space-between; border-top: 1px solid #473d3060; padding-top: 5px; font-size: 7px; font-weight: 700; }
 .tcg-favorite { position: absolute; top: 56px; right: 18px; z-index: 5; width: 34px; height: 34px; border: 1px solid #fff9; border-radius: 50%; background: #fffce6e8; color: #503c29; font-size: 24px; cursor: pointer; line-height: 1; }
 .tcg-favorite[aria-pressed="true"] { color: #b62350; background: #fff0ef; }
-.tcg-foil, .tcg-glare { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 3; border-radius: inherit; }
-.tcg-foil { background: repeating-linear-gradient(115deg, #ff98bf 0%, #ffe7a0 12%, #8ff5d2 24%, #8ecbff 36%, #cab0ff 48%, #ff98bf 60%); background-size: 300% 300%; background-position: var(--pointer-x) var(--pointer-y); mix-blend-mode: color-dodge; }
-.tcg-glare { background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), #fff 0%, #ffffff60 15%, transparent 55%); mix-blend-mode: screen; }
-.tcg-card:focus-within { outline: 3px solid var(--accent-primary); outline-offset: 5px; }
-.tcg-card:focus-within .tcg-foil { opacity: .22; }
+/* Focus and motion remain independent of the holographic art layers. */
+.tcg-slot:focus-within { outline: 3px solid var(--accent-primary); outline-offset: 5px; border-radius: 16px; }
 .tcg-link:focus-visible, .tcg-favorite:focus-visible { outline: 3px solid #26588a; outline-offset: -3px; }
 @media (hover: hover) and (pointer: fine) {
-  .tcg-card:hover { z-index: 4; box-shadow: 0 18px 38px #0008, 0 0 16px #d7c18460; }
-  .tcg-card:hover .tcg-foil { opacity: .42; }
-  .tcg-card:hover .tcg-glare { opacity: .48; }
+  .tcg-slot:hover { z-index: 4; }
+  .tcg-slot:hover .tcg-card { box-shadow: 0 22px 38px #0007, -5px -3px 18px #74defb40, 5px 5px 18px #ee85c540; }
 }
 @media (prefers-reduced-motion: reduce) {
   .tcg-card { transform: none; transition: none; }
-  .tcg-foil, .tcg-glare { transition: none; }
 }
 .skeleton-card { aspect-ratio: 63 / 88; }
 @media (max-width: 520px) {
@@ -1197,3 +1194,52 @@ a.evo-card:hover {
 .pokemon-detail-image-wrapper { flex-direction: column; min-width: 0; border-radius: 18px; }
 .pokemon-detail-image { width: 100%; height: auto; }
 @media (max-width: 640px) { .pokemon-detail-header { padding: 18px; }.pokemon-detail-info { min-width: 0; } }
+
+/* Section navigation stays available on desktop and small screens. */
+.site-header { position: sticky; top: 0; z-index: 100; padding: 1rem 0; border-bottom: 1px solid var(--border-color, rgba(255,255,255,.08)); }
+.navbar-layout { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+.section-nav { display: flex; align-items: center; gap: .3rem; }
+.section-nav a { color: var(--text-muted); text-decoration: none; font-size: .9rem; font-weight: 600; padding: .7rem .8rem; border-radius: .6rem; white-space: nowrap; }
+.section-nav a:hover, .section-nav a[aria-current] { color: var(--accent-primary); background: rgba(234,190,68,.08); }
+.section-nav a:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+#pokedex, #pokemon-list, #field-guide, #usage-guide { scroll-margin-top: 110px; }
+@media (max-width: 900px) {
+  .site-header { padding: .75rem 0 .4rem; }
+  .navbar-layout { gap: .5rem; }
+  .section-nav { order: 3; width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+  .section-nav a { text-align: center; padding: .75rem .1rem; font-size: clamp(.65rem, 2.7vw, .85rem); }
+  #pokedex, #pokemon-list, #field-guide, #usage-guide { scroll-margin-top: 145px; }
+}
+
+/* Reserve a consistent summary area while species descriptions load. */
+.tcg-discover { position: relative; }
+.tcg-discover strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 48px; }
+.tcg-summary-language { position: absolute; top: 10px; right: 0; font-size: 8px; color: #534635; }
+.tcg-discover p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; height: 4.5em; }
+
+/* Printed-card information hierarchy: identity, ability, stats, then flavor. */
+.pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.tcg-slot, .tcg-card { aspect-ratio: 63 / 92; }
+.tcg-card { min-height: 425px; }
+.tcg-details { flex-shrink: 0; padding: 8px 10px 7px; }
+.tcg-art-caption { font-size: 8px; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: linear-gradient(#fffdeb, #d3cfaf, #fffdeb); }
+.tcg-ability { position: relative; padding-bottom: 6px; }
+.tcg-ability-title { display: flex; align-items: center; gap: 6px; }
+.tcg-ability-title > span { border-radius: 50% 10% / 50%; background: linear-gradient(#f68073, #b52632 50%, #8e1526); color: white; font-size: 8px; font-weight: 800; padding: 2px 9px; }
+.tcg-ability-title strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tcg-ability p { font-size: 10px; line-height: 1.4; margin-top: 4px; height: 2.8em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.tcg-ability small { position: absolute; right: 0; top: 0; font-size: 7px; }
+.tcg-base-stats { padding: 4px 0 7px; }
+.tcg-base-stats > span { font-size: 7px; font-weight: 700; letter-spacing: .04em; }
+.tcg-base-stats > div { display: flex; justify-content: space-between; gap: 5px; font-size: 9px; margin-top: 2px; }
+.tcg-base-stats b { font-size: 14px; margin-left: 3px; }
+.tcg-details .tcg-type-row { padding: 3px 5px; border-block: 1px solid #82774b70; background: linear-gradient(#fff9, #9b947355, #fff9); }
+.tcg-type { padding: 1px 5px; }
+.tcg-flavor { display: grid; grid-template-columns: 58px 1fr; gap: 6px; padding: 6px 0; }
+.tcg-flavor > span { font-size: 7px; font-weight: 700; padding-top: 2px; }
+.tcg-flavor p { font-size: 9px; line-height: 1.4; height: 4.2em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+@media (max-width: 520px) { .pokemon-grid { grid-template-columns: minmax(0, 340px); justify-content: center; } }
+
+.tcg-hp { display: flex; align-items: baseline; gap: 3px; flex-shrink: 0; line-height: 1; }
+.tcg-hp small { font-size: 9px; font-weight: 800; }
+.tcg-hp b { font-size: 23px; font-weight: 800; letter-spacing: -.05em; }

@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchAllPokemonWithNames, fetchPokemonType } from '../api/pokeApi';
 import PokemonCard from '../components/PokemonCard';
@@ -28,6 +29,7 @@ const GENERATIONS = [
 
 const Home = () => {
     const { t, language } = useLanguage();
+    const location = useLocation();
     const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
     // SEO meta tags for home page
@@ -45,6 +47,15 @@ const Home = () => {
     const [typeDataCache, setTypeDataCache] = useState({});
     const [searchLoading, setSearchLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Wait for the card grid to settle before scrolling to sections below it.
+    useEffect(() => {
+        if (searchLoading || !location.hash) return;
+        const target = document.getElementById(location.hash.slice(1));
+        if (!target) return;
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+    }, [location.key, location.hash, searchLoading]);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -171,7 +182,7 @@ const Home = () => {
 
             <div className="main-layout">
                 <main className="main-content">
-                    <div className="section-heading dex-heading" id="pokedex">
+                    <div className="section-heading dex-heading" id="pokedex" tabIndex={-1}>
                         <span className="section-kicker">EXPLORE THE POKÉDEX</span>
                         <h2>
                             {language === 'ko' ? '어떤 포켓몬을 찾고 있나요?' : 'Who are you looking for?'}
@@ -234,7 +245,7 @@ const Home = () => {
                     </div>
 
                     {/* Content Area */}
-                    <div className="results-heading"><h3>{showFavoritesOnly ? (language === 'ko' ? '내가 저장한 포켓몬' : 'Your favorites') : (language === 'ko' ? '포켓몬 목록' : 'Pokémon directory')}</h3><span role="status">{searchLoading ? (language === 'ko' ? '불러오는 중…' : 'Loading…') : `${displayList.length.toLocaleString()} ${language === 'ko' ? '개의 검색 결과' : 'results'}`}</span><button className="reset-filters" onClick={() => { setSearchTerm(''); setSelectedTypes([]); setSelectedGen(null); setShowFavoritesOnly(false); setCurrentPage(1); }}>{language === 'ko' ? '필터 초기화' : 'Reset filters'}</button></div>
+                    <div className="results-heading" id="pokemon-list" tabIndex={-1}><h3>{showFavoritesOnly ? (language === 'ko' ? '내가 저장한 포켓몬' : 'Your favorites') : (language === 'ko' ? '포켓몬 목록' : 'Pokémon directory')}</h3><span role="status">{searchLoading ? (language === 'ko' ? '불러오는 중…' : 'Loading…') : `${displayList.length.toLocaleString()} ${language === 'ko' ? '개의 검색 결과' : 'results'}`}</span><button className="reset-filters" onClick={() => { setSearchTerm(''); setSelectedTypes([]); setSelectedGen(null); setShowFavoritesOnly(false); setCurrentPage(1); }}>{language === 'ko' ? '필터 초기화' : 'Reset filters'}</button></div>
                     {error && paginatedList.length === 0 ? (
                         <div className="error-message" role="alert">{error}</div>
                     ) : (

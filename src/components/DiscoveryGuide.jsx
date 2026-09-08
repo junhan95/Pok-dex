@@ -23,7 +23,7 @@ export default function DiscoveryGuide() {
     const ko = language === 'ko';
     return (
         <div className="discovery-guide">
-            <section className="guide-section" aria-labelledby="guide-title">
+            <section id="field-guide" tabIndex={-1} className="guide-section" aria-labelledby="guide-title">
                 <div className="section-heading"><span className="section-kicker">FIELD GUIDE</span><h2 id="guide-title">{ko ? '궁금한 포켓몬에서, 다음 발견으로.' : 'One Pokémon. More to discover.'}</h2><p>{ko ? '이 도감은 1~9세대 포켓몬의 이름, 타입, 기본 능력치와 진화 정보를 찾아보는 공간입니다.' : 'Explore names, types, base stats, and evolution information for Pokémon from generations I–IX.'}</p></div>
                 <div className="guide-grid">
                     <article><span className="guide-number">01 / FIND</span><h3>{ko ? '이름이 기억나면 검색부터' : 'Start with a name'}</h3><p>{ko ? '한국어·영어 이름이나 도감 번호로 찾아보세요. 이름의 일부만 입력해도 목록을 좁힐 수 있습니다.' : 'Search with a Korean or English name, or a Pokédex number. Part of a name works, too.'}</p><Link to="/pokemon/25">{ko ? '피카츄 알아보기' : 'Meet Pikachu'} ↗</Link></article>
@@ -31,7 +31,7 @@ export default function DiscoveryGuide() {
                     <article><span className="guide-number">03 / COLLECT</span><h3>{ko ? '좋아하는 포켓몬은 가까이에' : 'Keep your favorites close'}</h3><p>{ko ? '카드의 하트를 눌러 저장하세요. 즐겨찾기 필터로 다시 보고 싶은 포켓몬만 모아볼 수 있습니다.' : 'Save Pokémon with the heart on each card. Use the favorites filter to revisit your collection.'}</p><a href="#pokedex">{ko ? '나만의 목록 만들기' : 'Build your collection'} ↗</a></article>
                 </div>
             </section>
-            <section className="guide-section faq-section" aria-labelledby="faq-title"><div className="section-heading"><span className="section-kicker">QUESTIONS & ANSWERS</span><h2 id="faq-title">{ko ? '포켓몬 도감 이용 안내' : 'Using the Pokédex'}</h2><p>{ko ? '검색부터 즐겨찾기까지, 자주 궁금해할 내용을 모았습니다.' : 'Answers about searching, exploring, and saving Pokémon.'}</p></div><div className="faq-list">{questions[language].map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div></section>
+            <section id="usage-guide" tabIndex={-1} className="guide-section faq-section" aria-labelledby="faq-title"><div className="section-heading"><span className="section-kicker">QUESTIONS & ANSWERS</span><h2 id="faq-title">{ko ? '포켓몬 도감 이용 안내' : 'Using the Pokédex'}</h2><p>{ko ? '검색부터 즐겨찾기까지, 자주 궁금해할 내용을 모았습니다.' : 'Answers about searching, exploring, and saving Pokémon.'}</p></div><div className="faq-list">{questions[language].map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div></section>
             <aside className="source-note"><strong>{ko ? '데이터와 사이트 안내' : 'About this Pokédex'}</strong><p>{ko ? '포켓몬 정보는 ' : 'Pokémon data comes from '}<a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">PokéAPI</a>{ko ? '를 활용합니다. 포켓몬 관련 명칭과 이미지는 각 권리자에게 귀속되며, 본 사이트는 공식 서비스와 제휴하지 않은 팬 프로젝트입니다.' : '. Pokémon names and images belong to their respective owners. This fan project is not affiliated with the official service.'}</p></aside>
         </div>
     );
